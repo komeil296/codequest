@@ -6,6 +6,7 @@ import { User } from '../users/user.entity';
 import { Institution } from '../institutions/institution.entity';
 import { Course } from '../courses/course.entity';
 import { Lesson } from '../courses/lesson.entity';
+import { CourseInstitutionAccess } from '../courses/course-institution-access.entity';
 
 export interface DatabaseEnvironment {
   DB_HOST?: string;
@@ -44,7 +45,7 @@ export function buildTypeOrmOptions(
     username: env.DB_USERNAME!,
     password: env.DB_PASSWORD!,
     database: env.DB_DATABASE!,
-    entities: [User, Institution, Course, Lesson],
+    entities: [User, Institution, Course, Lesson, CourseInstitutionAccess],
     migrations: [__dirname + '/migrations/*{.ts,.js}'],
     migrationsTableName: 'migrations',
     synchronize: false,
