@@ -42,6 +42,16 @@ export class InstitutionsController {
     return this.institutionsService.findActive();
   }
 
+  @Get('admin/all')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.SUPER_ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List all institutions (super admin only)' })
+  @ApiOkResponse({ description: 'All institutions retrieved successfully.' })
+  findAll() {
+    return this.institutionsService.findAll();
+  }
+
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SUPER_ADMIN)
@@ -54,6 +64,16 @@ export class InstitutionsController {
   })
   create(@Body() dto: CreateInstitutionDto) {
     return this.institutionsService.create(dto);
+  }
+
+  @Patch(':id/deactivate')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.SUPER_ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Deactivate an institution (super admin only)' })
+  @ApiOkResponse({ description: 'Institution deactivated successfully.' })
+  deactivate(@Param('id', new ParseUUIDPipe()) id: string) {
+    return this.institutionsService.deactivate(id);
   }
 
   @Patch(':id/activate')
