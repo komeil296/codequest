@@ -159,9 +159,13 @@ export default function AdminDashboard({ auth, onLogout, onBack }: Props) {
 
   async function createLessonQuestion(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    const options = quizOptions.map(option => option.trim()).filter(Boolean)
+    const normalizedOptions = quizOptions.map(option => option.trim())
+    const firstBlank = normalizedOptions.findIndex(option => !option)
+    const hasGap = firstBlank >= 0 && normalizedOptions.slice(firstBlank).some(Boolean)
+    const options = normalizedOptions.filter(Boolean)
     if (!quizLessonId) { setError('ابتدا درس مربوط به آزمون را انتخاب کن.'); return }
     if (options.length < 2) { setError('حداقل دو گزینه وارد کن.'); return }
+    if (hasGap) { setError('گزینه‌ها را از اول و بدون فاصله پر کن.'); return }
     if (Number(quizCorrectIndex) >= options.length) { setError('گزینه صحیح را از میان گزینه‌های تکمیل‌شده انتخاب کن.'); return }
     await runAction(async () => {
       await request<LessonQuestion>(`/lessons/${quizLessonId}/questions`, { method: 'POST', body: JSON.stringify({ prompt: quizPrompt.trim(), options, correctOptionIndex: Number(quizCorrectIndex), points: Number(quizPoints), coins: Number(quizCoins) }) })
