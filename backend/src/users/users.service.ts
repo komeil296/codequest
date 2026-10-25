@@ -171,6 +171,48 @@ export class UsersService {
     }));
   }
 
+  async listAllStudents() {
+    const students = await this.userRepository.find({
+      where: { role: UserRole.STUDENT },
+      relations: { institution: true },
+      order: { createdAt: 'DESC' },
+    });
+
+    return students.map((student) => ({
+      id: student.id,
+      firstName: student.firstName,
+      lastName: student.lastName,
+      mobile: student.mobile,
+      username: student.username,
+      role: student.role,
+      institutionId: student.institution?.id ?? null,
+      institutionName: student.institution?.name ?? null,
+      mobileVerified: student.mobileVerified,
+      isActive: student.isActive,
+      createdAt: student.createdAt,
+    }));
+  }
+
+  async setStudentActive(studentId: string, isActive: boolean) {
+    const student = await this.findStudentById(studentId);
+    student.isActive = isActive;
+    const saved = await this.userRepository.save(student);
+    return { id: saved.id, username: saved.username, isActive: saved.isActive };
+  }
+
+  async changeStudentPasswordById(studentId: string, password: string) {
+    const student = await this.findStudentById(studentId);
+    student.passwordHash = await bcrypt.hash(password, 12);
+    await this.userRepository.save(student);
+    return { id: student.id, username: student.username, passwordChanged: true };
+  }
+
+  async deleteStudentById(studentId: string) {
+    const student = await this.findStudentById(studentId);
+    await this.userRepository.remove(student);
+    return { id: studentId, deleted: true };
+  }
+
   async deactivateStudent(institutionId: string, studentId: string) {
     const student = await this.findInstitutionStudent(institutionId, studentId);
     student.isActive = false;
@@ -196,6 +238,14 @@ export class UsersService {
     const student = await this.findInstitutionStudent(institutionId, studentId);
     await this.userRepository.remove(student);
     return { id: studentId, deleted: true };
+  }
+
+  private async findStudentById(studentId: string) {
+    const student = await this.userRepository.findOne({
+      where: { id: studentId, role: UserRole.STUDENT },
+    });
+    if (!student) throw new NotFoundException('Student not found');
+    return student;
   }
 
   private async findInstitutionStudent(institutionId: string, studentId: string) {
