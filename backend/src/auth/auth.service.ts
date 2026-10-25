@@ -4,7 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
-import { User } from '../users/user.entity';
+import { User, UserRole } from '../users/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -31,12 +31,19 @@ export class AuthService {
       throw new UnauthorizedException('Invalid username or password');
     }
 
-    if (user.mobile && !user.mobileVerified) {
+    // Student accounts with a supplied mobile number must verify it first.
+    // Institution administrators currently have no mobile-verification flow,
+    // so an unverified mobile must not prevent them from signing in.
+    if (
+      user.role === UserRole.STUDENT &&
+      user.mobile &&
+      !user.mobileVerified
+    ) {
       throw new UnauthorizedException('Mobile number is not verified');
     }
 
     if (
-      user.role !== 'SUPER_ADMIN' &&
+      user.role !== UserRole.SUPER_ADMIN &&
       (!user.institution || !user.institution.isActive)
     ) {
       throw new UnauthorizedException('Institution is inactive');
