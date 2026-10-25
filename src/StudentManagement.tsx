@@ -65,7 +65,7 @@ export default function StudentManagement({ auth, onBack, onLogout }: Props) {
   }
 
   async function deactivate(student: Student) {
-    if (student.isActive && !window.confirm(`حساب ${student.firstName} ${student.lastName} غیرفعال شود؟`)) return
+    if (!window.confirm(`حساب ${student.firstName} ${student.lastName} غیرفعال شود؟`)) return
     setError('')
     setMessage('')
     try {
@@ -74,6 +74,40 @@ export default function StudentManagement({ auth, onBack, onLogout }: Props) {
       setMessage('حساب دانش‌آموز غیرفعال شد.')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'تغییر وضعیت انجام نشد.')
+    }
+  }
+
+  async function activate(student: Student) {
+    if (!window.confirm(`حساب ${student.firstName} ${student.lastName} دوباره فعال شود؟`)) return
+    setError('')
+    setMessage('')
+    try {
+      await request(`/users/students/${student.id}/activate`, { method: 'PATCH' })
+      setStudents(current => current.map(item => item.id === student.id ? { ...item, isActive: true } : item))
+      setMessage('حساب دانش‌آموز دوباره فعال شد.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'فعال‌سازی مجدد انجام نشد.')
+    }
+  }
+
+  async function changePassword(student: Student) {
+    const password = window.prompt(`رمز جدید برای ${student.firstName} ${student.lastName} را وارد کن (حداقل ۸ کاراکتر):`)
+    if (password === null) return
+    if (password.length < 8 || password.length > 72) {
+      setError('رمز عبور باید بین ۸ تا ۷۲ کاراکتر باشد.')
+      return
+    }
+    if (!window.confirm(`رمز عبور این دانش‌آموز تغییر کند؟`)) return
+    setError('')
+    setMessage('')
+    try {
+      await request(`/users/students/${student.id}/password`, {
+        method: 'PATCH',
+        body: JSON.stringify({ password }),
+      })
+      setMessage(`رمز عبور ${student.firstName} ${student.lastName} تغییر کرد.`)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'تغییر رمز عبور انجام نشد.')
     }
   }
 
@@ -144,7 +178,10 @@ export default function StudentManagement({ auth, onBack, onLogout }: Props) {
               <div className="student-info"><strong>{student.firstName} {student.lastName}</strong><span>نام کاربری: {student.username}</span><span>{student.mobile || 'شماره موبایل ثبت نشده'}</span></div>
               <span className={`status-pill ${student.isActive ? 'active-status' : 'inactive-status'}`}>{student.isActive ? 'فعال' : 'غیرفعال'}</span>
               <div className="student-actions">
-                {student.isActive && <button className="small-action" onClick={() => void deactivate(student)}>غیرفعال‌سازی</button>}
+                <button className="small-action" onClick={() => void changePassword(student)}>تغییر رمز</button>
+                {student.isActive
+                  ? <button className="small-action" onClick={() => void deactivate(student)}>غیرفعال‌سازی</button>
+                  : <button className="small-action" onClick={() => void activate(student)}>فعال‌سازی مجدد</button>}
                 <button className="small-action delete-action" onClick={() => void deleteStudent(student)}>حذف</button>
               </div>
             </article>)}</div>
