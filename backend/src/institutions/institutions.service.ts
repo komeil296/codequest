@@ -15,6 +15,10 @@ export class InstitutionsService {
     private readonly institutionRepository: Repository<Institution>,
   ) {}
 
+  findAll() {
+    return this.institutionRepository.find({ order: { createdAt: 'DESC' } });
+  }
+
   findActive() {
     return this.institutionRepository.find({
       where: { isActive: true },
@@ -29,6 +33,13 @@ export class InstitutionsService {
       isActive: false,
     });
 
+    return this.institutionRepository.save(institution);
+  }
+
+  async deactivate(id: string) {
+    const institution = await this.institutionRepository.findOne({ where: { id } });
+    if (!institution) throw new NotFoundException('Institution not found');
+    institution.isActive = false;
     return this.institutionRepository.save(institution);
   }
 
