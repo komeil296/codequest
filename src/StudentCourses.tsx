@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { apiRequest, type AuthUser } from './api'
 import './Management.css'
+import StudentLessonQuiz from './StudentLessonQuiz'
 
 type StudentCourse = {
   enrollmentId: string
@@ -110,6 +111,7 @@ export default function StudentCourses({ auth, onBack, onLogout }: Props) {
                     <h2>{selectedLesson.title}</h2>
                     {selectedLesson.description && <p className="muted-text">{selectedLesson.description}</p>}
                     <div className="lesson-content-text">{selectedLesson.content?.trim() || 'محتوای این درس هنوز آماده نشده است.'}</div>
+                    <StudentLessonQuiz auth={auth} lessonId={selectedLesson.id} />
                   </> : <div className="empty-state">یک درس را از فهرست انتخاب کن.</div>}
                 </article>
               </div>
