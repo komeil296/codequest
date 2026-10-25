@@ -73,6 +73,36 @@ export class UsersService {
     };
   }
 
+  async listAllInstitutionAdmins() {
+    const admins = await this.userRepository.find({
+      where: { role: UserRole.INSTITUTION_ADMIN },
+      relations: { institution: true },
+      order: { createdAt: 'DESC' },
+    });
+
+    return admins.map((admin) => ({
+      id: admin.id,
+      firstName: admin.firstName,
+      lastName: admin.lastName,
+      mobile: admin.mobile,
+      username: admin.username,
+      institutionId: admin.institution?.id ?? null,
+      institutionName: admin.institution?.name ?? null,
+      isActive: admin.isActive,
+      createdAt: admin.createdAt,
+    }));
+  }
+
+  async setInstitutionAdminActive(adminId: string, isActive: boolean) {
+    const admin = await this.userRepository.findOne({
+      where: { id: adminId, role: UserRole.INSTITUTION_ADMIN },
+    });
+    if (!admin) throw new NotFoundException('Institution administrator not found');
+    admin.isActive = isActive;
+    const saved = await this.userRepository.save(admin);
+    return { id: saved.id, username: saved.username, isActive: saved.isActive };
+  }
+
   async createStudent(institutionId: string, dto: CreateStudentDto) {
     const institution = await this.institutionRepository.findOne({
       where: { id: institutionId, isActive: true },
