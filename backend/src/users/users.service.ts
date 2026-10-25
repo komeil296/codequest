@@ -73,10 +73,7 @@ export class UsersService {
     };
   }
 
-  async createStudent(
-    institutionId: string,
-    dto: CreateStudentDto,
-  ) {
+  async createStudent(institutionId: string, dto: CreateStudentDto) {
     const institution = await this.institutionRepository.findOne({
       where: { id: institutionId, isActive: true },
     });
@@ -87,20 +84,14 @@ export class UsersService {
 
     const mobile = dto.mobile?.trim() || null;
     if (mobile) {
-      const existingMobile = await this.userRepository.findOne({
-        where: { mobile },
-      });
-      if (existingMobile) {
-        throw new ConflictException('Mobile number already exists');
-      }
+      const existingMobile = await this.userRepository.findOne({ where: { mobile } });
+      if (existingMobile) throw new ConflictException('Mobile number already exists');
     }
 
     // The database unique constraint remains the final protection against races.
     for (let attempt = 0; attempt < 5; attempt += 1) {
       const username = `student-${randomBytes(6).toString('hex')}`;
-      const existingUsername = await this.userRepository.findOne({
-        where: { username },
-      });
+      const existingUsername = await this.userRepository.findOne({ where: { username } });
       if (existingUsername) continue;
 
       const temporaryPassword = randomBytes(18).toString('base64url');
@@ -131,11 +122,9 @@ export class UsersService {
             isActive: saved.isActive,
             createdAt: saved.createdAt,
           },
-          // Show this only once when the account is created; never store plaintext.
           temporaryPassword,
         };
       } catch (error) {
-        // Retry only a username collision; report other database errors.
         if (
           typeof error === 'object' &&
           error !== null &&
@@ -153,9 +142,7 @@ export class UsersService {
           if (
             constraint === 'UQ_fe0bb3f6520ee0469504521e710' &&
             attempt < 4
-          ) {
-            continue;
-          }
+          ) continue;
         }
         throw error;
       }
@@ -166,10 +153,7 @@ export class UsersService {
 
   async listStudents(institutionId: string) {
     const students = await this.userRepository.find({
-      where: {
-        role: UserRole.STUDENT,
-        institution: { id: institutionId },
-      },
+      where: { role: UserRole.STUDENT, institution: { id: institutionId } },
       order: { createdAt: 'DESC' },
     });
 
@@ -194,6 +178,20 @@ export class UsersService {
     return { id: saved.id, username: saved.username, isActive: saved.isActive };
   }
 
+  async activateStudent(institutionId: string, studentId: string) {
+    const student = await this.findInstitutionStudent(institutionId, studentId);
+    student.isActive = true;
+    const saved = await this.userRepository.save(student);
+    return { id: saved.id, username: saved.username, isActive: saved.isActive };
+  }
+
+  async changeStudentPassword(institutionId: string, studentId: string, password: string) {
+    const student = await this.findInstitutionStudent(institutionId, studentId);
+    student.passwordHash = await bcrypt.hash(password, 12);
+    await this.userRepository.save(student);
+    return { id: student.id, username: student.username, passwordChanged: true };
+  }
+
   async deleteStudent(institutionId: string, studentId: string) {
     const student = await this.findInstitutionStudent(institutionId, studentId);
     await this.userRepository.remove(student);
@@ -209,9 +207,7 @@ export class UsersService {
       },
     });
 
-    if (!student) {
-      throw new NotFoundException('Student not found in your institution');
-    }
+    if (!student) throw new NotFoundException('Student not found in your institution');
     return student;
   }
 }
