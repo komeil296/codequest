@@ -109,6 +109,33 @@ export class UsersController {
     return this.usersService.createInstitutionAdmin(dto);
   }
 
+  @Get('admin/institution-admins')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.SUPER_ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List institution administrators (super admin only)' })
+  listInstitutionAdmins() {
+    return this.usersService.listAllInstitutionAdmins();
+  }
+
+  @Patch('admin/institution-admins/:adminId/deactivate')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.SUPER_ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Deactivate an institution administrator (super admin only)' })
+  deactivateInstitutionAdmin(@Param('adminId') adminId: string) {
+    return this.usersService.setInstitutionAdminActive(adminId, false);
+  }
+
+  @Patch('admin/institution-admins/:adminId/activate')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.SUPER_ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Activate an institution administrator (super admin only)' })
+  activateInstitutionAdmin(@Param('adminId') adminId: string) {
+    return this.usersService.setInstitutionAdminActive(adminId, true);
+  }
+
   @Post('students')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.INSTITUTION_ADMIN)
