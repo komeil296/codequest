@@ -1,8 +1,4 @@
-
-import {
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { Repository } from 'typeorm';
@@ -23,30 +19,27 @@ export class AuthService {
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.institution', 'institution')
       .addSelect('user.passwordHash')
-      .where('user.username = :username', {
-        username: username.trim(),
-      })
+      .where('user.username = :username', { username: username.trim() })
       .getOne();
 
-    if (!user) {
+    if (!user || !user.isActive) {
       throw new UnauthorizedException('Invalid username or password');
     }
 
-    const passwordMatches = await bcrypt.compare(
-      password,
-      user.passwordHash,
-    );
-
+    const passwordMatches = await bcrypt.compare(password, user.passwordHash);
     if (!passwordMatches) {
       throw new UnauthorizedException('Invalid username or password');
     }
 
-    if (!user.mobileVerified) {
+    if (user.mobile && !user.mobileVerified) {
       throw new UnauthorizedException('Mobile number is not verified');
     }
 
-    const institutionId = user.institution?.id ?? null;
+    if (user.role === 'INSTITUTION_ADMIN' && !user.institution?.isActive) {
+      throw new UnauthorizedException('Institution is inactive');
+    }
 
+    const institutionId = user.institution?.id ?? null;
     const payload = {
       sub: user.id,
       username: user.username,

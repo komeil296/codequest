@@ -25,8 +25,8 @@ export class User {
   @Column({ length: 100 })
   lastName: string;
 
-  @Column({ unique: true, length: 20 })
-  mobile: string;
+  @Column({ type: 'varchar', length: 20, unique: true, nullable: true })
+  mobile: string | null;
 
   @Column({ default: false })
   mobileVerified: boolean;
@@ -43,6 +43,9 @@ export class User {
     default: UserRole.STUDENT,
   })
   role: UserRole;
+
+  @Column({ default: true })
+  isActive: boolean;
 
   @ManyToOne(() => Institution, {
     nullable: true,
