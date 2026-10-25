@@ -6,6 +6,7 @@ import { buildTypeOrmOptions } from './database/typeorm-options';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { InstitutionsModule } from './institutions/institutions.module';
+import { CoursesModule } from './courses/courses.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { InstitutionsModule } from './institutions/institutions.module';
     AuthModule,
     UsersModule,
     InstitutionsModule,
+    CoursesModule,
   ],
 })
 export class AppModule {}
