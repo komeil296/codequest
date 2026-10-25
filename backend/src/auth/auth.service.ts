@@ -31,16 +31,9 @@ export class AuthService {
       throw new UnauthorizedException('Invalid username or password');
     }
 
-    // Student accounts with a supplied mobile number must verify it first.
-    // Institution administrators currently have no mobile-verification flow,
-    // so an unverified mobile must not prevent them from signing in.
-    if (
-      user.role === UserRole.STUDENT &&
-      user.mobile &&
-      !user.mobileVerified
-    ) {
-      throw new UnauthorizedException('Mobile number is not verified');
-    }
+    // Mobile verification is not enforced until a complete verification flow
+    // (such as an OTP challenge) is implemented. Institution-created student
+    // accounts can therefore sign in with their assigned username/password.
 
     if (
       user.role !== UserRole.SUPER_ADMIN &&
