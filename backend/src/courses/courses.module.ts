@@ -14,19 +14,22 @@ import { CourseInstitutionAccessService } from './course-institution-access.serv
 import { CourseEnrollment } from './course-enrollment.entity';
 import { CourseEnrollmentController } from './course-enrollment.controller';
 import { CourseEnrollmentService } from './course-enrollment.service';
+import { StudentCourseController } from './student-course.controller';
+import { StudentCourseService } from './student-course.service';
 import { User } from '../users/user.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Course, Lesson, CourseInstitutionAccess, CourseEnrollment, Institution, User]),
+    TypeOrmModule.forFeature([Course, Lesson, CourseInstitutionAccess, CourseEnrollment, Institution, User, Lesson]),
   ],
   controllers: [
     CoursesController,
     LessonsController,
     CourseInstitutionAccessController,
     CourseEnrollmentController,
+    StudentCourseController,
   ],
-  providers: [CoursesService, LessonsService, CourseInstitutionAccessService, CourseEnrollmentService],
-  exports: [CoursesService, LessonsService, CourseInstitutionAccessService, CourseEnrollmentService],
+  providers: [CoursesService, LessonsService, CourseInstitutionAccessService, CourseEnrollmentService, StudentCourseService],
+  exports: [CoursesService, LessonsService, CourseInstitutionAccessService, CourseEnrollmentService, StudentCourseService],
 })
 export class CoursesModule {}
