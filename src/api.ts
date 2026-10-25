@@ -48,15 +48,24 @@ export async function apiRequest<T>(path: string, init: RequestInit & { token?: 
   }
 
   if (!response.ok) {
-    let message = `خطای سرور (${response.status})`
+    let serverMessage = ''
     try {
       const body = await response.json() as { message?: string | string[] }
-      if (Array.isArray(body.message)) message = body.message.join('، ')
-      else if (body.message) message = body.message
+      if (Array.isArray(body.message)) serverMessage = body.message.join('، ')
+      else if (body.message) serverMessage = body.message
     } catch { /* پاسخ ممکن است JSON نباشد */ }
-    if (response.status === 401) message = 'ورود معتبر نیست یا نشست شما منقضی شده است. دوباره وارد شوید.'
-    if (response.status === 403) message = 'این حساب اجازه انجام این کار را ندارد.'
-    throw new Error(message)
+
+    if (response.status === 401) {
+      if (path === '/auth/login') {
+        if (serverMessage === 'Mobile number is not verified') {
+          throw new Error('شماره موبایل این حساب هنوز تأیید نشده است.')
+        }
+        throw new Error('نام کاربری یا رمز عبور اشتباه است، یا حساب غیرفعال شده است.')
+      }
+      throw new Error('ورود معتبر نیست یا نشست شما منقضی شده است. دوباره وارد شوید.')
+    }
+
+    throw new Error(serverMessage || `خطای سرور (${response.status})`)
   }
 
   if (response.status === 204) return undefined as T
