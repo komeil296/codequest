@@ -50,7 +50,7 @@ export class LessonQuestionsService {
       where: { lesson: { id: lessonId }, isActive: true },
       order: { createdAt: 'ASC' },
     });
-    const answers = await this.answerRepository.find({ where: { student: { id: studentId } } });
+    const answers = await this.answerRepository.find({ where: { student: { id: studentId } }, relations: { question: true } });
     const answerByQuestion = new Map(answers.map(answer => [answer.question.id, answer]));
     return questions.map(question => {
       const answer = answerByQuestion.get(question.id);
