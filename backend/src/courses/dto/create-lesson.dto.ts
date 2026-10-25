@@ -14,6 +14,12 @@ export class CreateLessonDto {
   @MaxLength(5000)
   description?: string;
 
+  @ApiPropertyOptional({ example: 'In this lesson, we will learn how variables store values.' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(50000)
+  content?: string;
+
   @ApiPropertyOptional({ example: 1, minimum: 0, description: 'Display order; if omitted, the lesson is placed last.' })
   @IsOptional()
   @IsInt()
