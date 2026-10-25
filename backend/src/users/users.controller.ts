@@ -21,6 +21,7 @@ import { Request } from 'express';
 import { UsersService } from './users.service';
 import { CreateInstitutionAdminDto } from './dto/create-institution-admin.dto';
 import { CreateStudentDto } from './dto/create-student.dto';
+import { ChangeStudentPasswordDto } from './dto/change-student-password.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -81,6 +82,32 @@ export class UsersController {
     const institutionId = request.user.institutionId;
     if (!institutionId) throw new NotFoundException('Administrator institution not found');
     return this.usersService.deactivateStudent(institutionId, studentId);
+  }
+
+  @Patch('students/:studentId/activate')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.INSTITUTION_ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Reactivate a student belonging to the current institution' })
+  activateStudent(@Req() request: AuthenticatedRequest, @Param('studentId') studentId: string) {
+    const institutionId = request.user.institutionId;
+    if (!institutionId) throw new NotFoundException('Administrator institution not found');
+    return this.usersService.activateStudent(institutionId, studentId);
+  }
+
+  @Patch('students/:studentId/password')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.INSTITUTION_ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Set a new password for a student in the current institution' })
+  changeStudentPassword(
+    @Req() request: AuthenticatedRequest,
+    @Param('studentId') studentId: string,
+    @Body() dto: ChangeStudentPasswordDto,
+  ) {
+    const institutionId = request.user.institutionId;
+    if (!institutionId) throw new NotFoundException('Administrator institution not found');
+    return this.usersService.changeStudentPassword(institutionId, studentId, dto.password);
   }
 
   @Delete('students/:studentId')
