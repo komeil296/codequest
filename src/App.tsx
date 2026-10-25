@@ -2,6 +2,9 @@
 import { useState } from 'react'
 import './App.css'
 import Mission from './Mission'
+import Login from './Login'
+import StudentManagement from './StudentManagement'
+import type { AuthUser } from './api'
 type Lesson = {
   id: number
   title: string
@@ -29,11 +32,35 @@ const lessons: Lesson[] = [
 function App() {
   const [activeLesson, setActiveLesson] = useState(2)
   const [showAll, setShowAll] = useState(false)
-  const [page, setPage] = useState<'dashboard' | 'mission'>('dashboard')
+  const [page, setPage] = useState<'dashboard' | 'mission' | 'login' | 'students'>('dashboard')
+  const [auth, setAuth] = useState<{ token: string; user: AuthUser } | null>(() => {
+    const token = localStorage.getItem('codequest_token')
+    const rawUser = localStorage.getItem('codequest_user')
+    if (!token || !rawUser) return null
+    try { return { token, user: JSON.parse(rawUser) as AuthUser } } catch { return null }
+  })
 
 if (page === 'mission') {
   return <Mission onBack={() => setPage('dashboard')} />
 }
+
+  if (page === 'login') {
+    return <Login onBack={() => setPage('dashboard')} onLogin={(result) => {
+      localStorage.setItem('codequest_token', result.accessToken)
+      localStorage.setItem('codequest_user', JSON.stringify(result.user))
+      setAuth({ token: result.accessToken, user: result.user })
+      setPage(result.user.role === 'INSTITUTION_ADMIN' ? 'students' : 'dashboard')
+    }} />
+  }
+
+  if (page === 'students' && auth) {
+    return <StudentManagement auth={auth} onBack={() => setPage('dashboard')} onLogout={() => {
+      localStorage.removeItem('codequest_token')
+      localStorage.removeItem('codequest_user')
+      setAuth(null)
+      setPage('dashboard')
+    }} />
+  }
   const completedCount = lessons.filter(
     (lesson) => lesson.status === 'completed',
   ).length
@@ -86,8 +113,8 @@ if (page === 'mission') {
             <p className="eyebrow">آماده‌ای چیزی بسازی؟</p>
             <h1>سلام، قهرمان! <span>👋</span></h1>
           </div>
-          <button className="teacher-button" onClick={() => window.alert('پنل معلم را در مرحله بعد می‌سازیم.')}>
-            <span>♙</span> فضای معلم
+          <button className="teacher-button" onClick={() => setPage(auth?.user.role === 'INSTITUTION_ADMIN' ? 'students' : 'login')}>
+            <span>♙</span> {auth?.user.role === 'INSTITUTION_ADMIN' ? 'مدیریت دانش‌آموزان' : 'ورود مدیر / معلم'}
           </button>
         </header>
 

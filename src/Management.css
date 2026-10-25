@@ -1,0 +1,60 @@
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&display=swap');
+
+.management-page { min-height: 100vh; color: #f3f3fa; background: #10111b; font-family: 'Vazirmatn', Tahoma, sans-serif; }
+.management-header { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px clamp(16px, 4vw, 56px); background: #151622; border-bottom: 1px solid #292a3a; }
+.management-brand { font-size: 22px; font-weight: 900; letter-spacing: -.5px; }
+.management-brand span { color: #a99eff; }
+.secondary-button { padding: 9px 13px; border: 1px solid #39394f; border-radius: 9px; background: #1b1c2a; color: #d4d4e5; font: inherit; font-size: 12px; cursor: pointer; }
+.secondary-button:hover { border-color: #8f80ee; }
+.login-card { width: min(440px, calc(100% - 32px)); margin: 8vh auto; padding: 34px; background: #191a28; border: 1px solid #303145; border-radius: 20px; box-shadow: 0 24px 70px #0003; }
+.management-icon { display: grid; place-items: center; width: 55px; height: 55px; border-radius: 16px; background: #302b4d; font-size: 25px; }
+.management-eyebrow { margin: 0 0 8px; color: #a69aff; font-size: 12px; font-weight: 800; }
+.login-card .management-eyebrow { margin-top: 24px; }
+.login-card h1, .management-title-row h1 { margin: 0; font-size: clamp(25px, 4vw, 34px); }
+.muted-text { color: #a1a3bb; font-size: 12px; line-height: 2; }
+.management-form { display: grid; gap: 16px; margin-top: 23px; }
+.management-form label { display: grid; gap: 8px; color: #dcdbea; font-size: 12px; font-weight: 700; }
+.management-form input { width: 100%; min-width: 0; padding: 12px 13px; color: #f4f2ff; background: #11121d; border: 1px solid #36374c; border-radius: 9px; outline: none; font: inherit; font-size: 13px; }
+.management-form input:focus { border-color: #9a8aff; box-shadow: 0 0 0 3px #9a8aff20; }
+.full-button { width: 100%; min-height: 44px; font: inherit; font-size: 12px; }
+.full-button:disabled { cursor: wait; opacity: .65; }
+.login-footnote, .form-help { color: #8587a0; font-size: 11px; line-height: 2; }
+.login-footnote { margin: 23px 0 0; }
+.management-content { max-width: 1500px; margin: auto; padding: 34px clamp(16px, 4vw, 56px) 48px; }
+.management-title-row { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 26px; }
+.student-count { display: grid; justify-items: center; min-width: 95px; padding: 14px; border: 1px solid #393452; border-radius: 14px; background: #25213a; }
+.student-count strong { color: #c6baff; font-size: 25px; }
+.student-count span { color: #a7a2c1; font-size: 10px; }
+.management-columns { display: grid; grid-template-columns: minmax(280px, .75fr) minmax(0, 1.5fr); align-items: start; gap: 18px; }
+.management-panel { min-width: 0; padding: 22px; border: 1px solid #303145; border-radius: 16px; background: #191a28; }
+.panel-heading { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.panel-symbol { display: grid; place-items: center; flex-shrink: 0; width: 42px; height: 42px; border-radius: 12px; background: #302b4d; color: #c4baff; font-size: 23px; }
+.panel-heading h2 { margin: 0 0 5px; font-size: 15px; }
+.panel-heading p { margin: 0; color: #9294ad; font-size: 10px; line-height: 1.8; }
+.optional-label { color: #8587a0; font-weight: 400; }
+.form-help { margin: 0; }
+.notice { padding: 12px 14px; margin: 14px 0; border-radius: 10px; font-size: 12px; line-height: 1.9; overflow-wrap: anywhere; }
+.error-notice { color: #ffb0b7; border: 1px solid #6c343d; background: #321d26; }
+.success-notice { color: #a5f0c8; border: 1px solid #285c47; background: #142b23; }
+.refresh-button { margin-inline-start: auto; white-space: nowrap; }
+.empty-state { padding: 45px 15px; text-align: center; color: #9698b1; font-size: 12px; }
+.student-list { display: grid; }
+.student-row { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 14px 0; border-top: 1px solid #303145; }
+.student-avatar { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 13px; color: #d6cdff; background: #302b4d; font-size: 12px; font-weight: 800; }
+.student-info { display: grid; gap: 5px; min-width: 0; }
+.student-info strong { font-size: 12px; }
+.student-info span { color: #9698b1; font-size: 10px; overflow-wrap: anywhere; }
+.status-pill { padding: 5px 8px; border-radius: 20px; font-size: 10px; white-space: nowrap; }
+.active-status { color: #91e9bc; background: #1c3c30; }
+.inactive-status { color: #ffb4b9; background: #44262e; }
+.student-actions { grid-column: 2 / -1; display: flex; gap: 8px; flex-wrap: wrap; }
+.small-action { padding: 6px 9px; border: 1px solid #4c4568; border-radius: 7px; background: #252238; color: #cfc5ff; font: inherit; font-size: 10px; cursor: pointer; }
+.delete-action { color: #ffb1b8; border-color: #633640; background: #311d25; }
+.credential-card { display: grid; gap: 15px; margin: 0 0 20px; padding: 20px; border: 1px solid #3e6a55; border-radius: 14px; background: #15291f; }
+.credential-card > div:first-child strong { font-size: 14px; }
+.credential-card p { color: #a6c9b5; font-size: 11px; line-height: 1.9; margin: 6px 0 0; }
+.credential-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.credential-grid label { display: grid; gap: 7px; color: #a6c9b5; font-size: 11px; }
+.credential-grid code { padding: 10px; color: #e2f6e9; background: #0d1d15; border-radius: 7px; direction: ltr; text-align: left; overflow-wrap: anywhere; user-select: all; }
+@media (max-width: 900px) { .management-columns { grid-template-columns: 1fr; } .create-panel { order: 0; } .roster-panel { order: 1; } }
+@media (max-width: 520px) { .management-header { flex-wrap: wrap; } .management-brand { order: -1; width: 100%; } .management-content { padding-top: 24px; } .management-panel { padding: 15px; } .student-row { grid-template-columns: 38px minmax(0, 1fr) auto; gap: 9px; } .student-avatar { width: 38px; height: 38px; } .credential-grid { grid-template-columns: 1fr; } .login-card { padding: 24px; } }
