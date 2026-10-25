@@ -1,4 +1,3 @@
-
 import {
   Body,
   Controller,
@@ -64,6 +63,20 @@ export class InstitutionsController {
   })
   create(@Body() dto: CreateInstitutionDto) {
     return this.institutionsService.create(dto);
+  }
+
+  @Patch(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.SUPER_ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update institution name (super admin only)' })
+  @ApiOkResponse({ description: 'Institution updated successfully.' })
+  @ApiNotFoundResponse({ description: 'Institution not found.' })
+  update(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() dto: CreateInstitutionDto,
+  ) {
+    return this.institutionsService.update(id, dto);
   }
 
   @Patch(':id/deactivate')
