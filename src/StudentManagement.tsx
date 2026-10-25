@@ -2,6 +2,9 @@ import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { apiRequest, type AuthUser, type Student, type CreatedStudent } from './api'
 import './Management.css'
 
+type CourseOption = { id: string; title: string; description: string | null }
+type CourseEnrollment = { id: string; createdAt: string; student: { id: string; firstName: string; lastName: string; username: string; isActive: boolean } }
+
 type Props = {
   auth: { token: string; user: AuthUser }
   onBack: () => void
@@ -10,6 +13,10 @@ type Props = {
 
 export default function StudentManagement({ auth, onBack, onLogout }: Props) {
   const [students, setStudents] = useState<Student[]>([])
+  const [availableCourses, setAvailableCourses] = useState<CourseOption[]>([])
+  const [selectedEnrollmentCourse, setSelectedEnrollmentCourse] = useState('')
+  const [courseEnrollments, setCourseEnrollments] = useState<CourseEnrollment[]>([])
+  const [selectedEnrollmentStudents, setSelectedEnrollmentStudents] = useState<string[]>([])
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [mobile, setMobile] = useState('')
@@ -34,7 +41,47 @@ export default function StudentManagement({ auth, onBack, onLogout }: Props) {
     }
   }, [request])
 
+  const loadAvailableCourses = useCallback(async () => {
+    const items = await request<CourseOption[]>('/course-enrollments/courses')
+    setAvailableCourses(items)
+    setSelectedEnrollmentCourse(current => current && items.some(item => item.id === current) ? current : items[0]?.id || '')
+  }, [request])
+
+  const loadCourseEnrollments = useCallback(async (courseId: string) => {
+    if (!courseId) { setCourseEnrollments([]); return }
+    setCourseEnrollments(await request<CourseEnrollment[]>(`/course-enrollments/${courseId}`))
+  }, [request])
+
   useEffect(() => { void loadStudents() }, [loadStudents])
+  useEffect(() => {
+    void loadAvailableCourses().catch(err => setError(err instanceof Error ? err.message : 'دریافت دوره‌های مجاز ناموفق بود.'))
+  }, [loadAvailableCourses])
+  useEffect(() => {
+    setSelectedEnrollmentStudents([])
+    void loadCourseEnrollments(selectedEnrollmentCourse).catch(err => setError(err instanceof Error ? err.message : 'دریافت ثبت‌نام‌های دوره ناموفق بود.'))
+  }, [selectedEnrollmentCourse, loadCourseEnrollments])
+
+  async function enrollSelectedStudents(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!selectedEnrollmentCourse) { setError('برای مؤسسه شما دوره آزادی وجود ندارد.'); return }
+    if (selectedEnrollmentStudents.length === 0) { setError('حداقل یک دانش‌آموز فعال را انتخاب کن.'); return }
+    setError('')
+    setMessage('')
+    setSaving(true)
+    try {
+      const result = await request<{ enrolledCount: number; alreadyEnrolledCount: number }>(`/course-enrollments/${selectedEnrollmentCourse}`, {
+        method: 'POST',
+        body: JSON.stringify({ studentIds: selectedEnrollmentStudents }),
+      })
+      await loadCourseEnrollments(selectedEnrollmentCourse)
+      setSelectedEnrollmentStudents([])
+      setMessage(`ثبت‌نام انجام شد: ${result.enrolledCount} دانش‌آموز جدید؛ ${result.alreadyEnrolledCount} نفر از قبل ثبت‌نام بودند.`)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'ثبت‌نام دانش‌آموزان ناموفق بود.')
+    } finally {
+      setSaving(false)
+    }
+  }
 
   async function createStudent(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -188,6 +235,48 @@ export default function StudentManagement({ auth, onBack, onLogout }: Props) {
           }
         </section>
       </div>
+
+      <section className="management-panel enrollment-panel">
+        <div className="panel-heading">
+          <span className="panel-symbol">▣</span>
+          <div><h2>ثبت‌نام دانش‌آموز در دوره</h2><p>فقط دوره‌هایی نمایش داده می‌شوند که مدیر کل برای مؤسسه شما آزاد کرده است.</p></div>
+        </div>
+        {availableCourses.length === 0 ? <div className="empty-state">در حال حاضر دوره فعالی برای مؤسسه شما آزاد نشده است.</div> : <>
+          <label className="enrollment-course-label">انتخاب دوره
+            <select value={selectedEnrollmentCourse} onChange={e => setSelectedEnrollmentCourse(e.target.value)}>
+              {availableCourses.map(course => <option key={course.id} value={course.id}>{course.title}</option>)}
+            </select>
+          </label>
+          <form onSubmit={enrollSelectedStudents}>
+            <div className="enrollment-layout">
+              <div className="enrollment-student-picker">
+                <h3>دانش‌آموزان قابل ثبت‌نام</h3>
+                <p className="form-help">دانش‌آموزان غیرفعال یا ثبت‌نام‌شده در این فهرست نیستند.</p>
+                {students.filter(student => student.isActive && !courseEnrollments.some(item => item.student.id === student.id)).length === 0
+                  ? <div className="empty-state">دانش‌آموز فعالی برای ثبت‌نام باقی نمانده است.</div>
+                  : <div className="enrollment-checkbox-list">
+                    {students.filter(student => student.isActive && !courseEnrollments.some(item => item.student.id === student.id)).map(student => (
+                      <label className="enrollment-checkbox" key={student.id}>
+                        <input type="checkbox" checked={selectedEnrollmentStudents.includes(student.id)} onChange={event => setSelectedEnrollmentStudents(current => event.target.checked ? [...current, student.id] : current.filter(id => id !== student.id))} />
+                        <span><strong>{student.firstName} {student.lastName}</strong><small>{student.username}</small></span>
+                      </label>
+                    ))}
+                  </div>}
+                <button className="primary-button full-button" disabled={saving || selectedEnrollmentStudents.length === 0}>{saving ? 'در حال ثبت‌نام…' : `ثبت‌نام ${selectedEnrollmentStudents.length.toLocaleString('fa-IR')} دانش‌آموز`} <span>←</span></button>
+              </div>
+              <div className="enrolled-students">
+                <h3>ثبت‌نام‌شده‌های این دوره <span>{courseEnrollments.length.toLocaleString('fa-IR')}</span></h3>
+                {courseEnrollments.length === 0 ? <div className="empty-state">هنوز دانش‌آموزی در این دوره ثبت‌نام نشده است.</div> :
+                  <div className="student-list">{courseEnrollments.map(item => <article className="enrolled-student-row" key={item.id}>
+                    <div className="student-avatar">{item.student.firstName.slice(0, 1)}{item.student.lastName.slice(0, 1)}</div>
+                    <div className="student-info"><strong>{item.student.firstName} {item.student.lastName}</strong><span>نام کاربری: {item.student.username}</span></div>
+                    <span className={`status-pill ${item.student.isActive ? 'active-status' : 'inactive-status'}`}>{item.student.isActive ? 'فعال' : 'غیرفعال'}</span>
+                  </article>)}</div>}
+              </div>
+            </div>
+          </form>
+        </>}
+      </section>
     </main>
   </div>
 }
