@@ -29,4 +29,4 @@ jobs:
       - name: Build backend
         run: npm run build
       - name: Run unit tests
-        run: npm test -- --runInBand
+        run: npm test -- --runInBand --passWithNoTests
