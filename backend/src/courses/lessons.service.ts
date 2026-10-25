@@ -24,6 +24,7 @@ export class LessonsService {
       course,
       title: dto.title.trim(),
       description: dto.description?.trim() || null,
+      content: dto.content?.trim() || null,
       sortOrder,
     });
 
@@ -44,6 +45,9 @@ export class LessonsService {
     if (dto.title !== undefined) lesson.title = dto.title.trim();
     if (dto.description !== undefined) {
       lesson.description = dto.description?.trim() || null;
+    }
+    if (dto.content !== undefined) {
+      lesson.content = dto.content?.trim() || null;
     }
     if (dto.sortOrder !== undefined) lesson.sortOrder = dto.sortOrder;
     if (dto.isActive !== undefined) lesson.isActive = dto.isActive;
