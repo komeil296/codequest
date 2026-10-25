@@ -5,7 +5,7 @@ export class AddLessonQuestions1761000000000 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`CREATE TABLE "lesson_questions" (
-      "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
+      "id" uuid NOT NULL DEFAULT gen_random_uuid(),
       "lessonId" uuid NOT NULL,
       "prompt" character varying(500) NOT NULL,
       "options" jsonb NOT NULL,
@@ -18,7 +18,7 @@ export class AddLessonQuestions1761000000000 implements MigrationInterface {
       CONSTRAINT "FK_lesson_questions_lesson" FOREIGN KEY ("lessonId") REFERENCES "lessons"("id") ON DELETE CASCADE ON UPDATE NO ACTION
     )`);
     await queryRunner.query(`CREATE TABLE "lesson_question_answers" (
-      "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
+      "id" uuid NOT NULL DEFAULT gen_random_uuid(),
       "studentId" uuid NOT NULL,
       "questionId" uuid NOT NULL,
       "selectedOptionIndex" integer NOT NULL,
