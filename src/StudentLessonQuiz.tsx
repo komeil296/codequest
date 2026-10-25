@@ -55,7 +55,7 @@ export default function StudentLessonQuiz({ auth, lessonId }: Props) {
 
   return <section className="student-quiz-section">
     <div className="student-quiz-heading">
-      <div><span className="management-eyebrow">تمرین امتیازدار</span><h3>آزمون چهارگزینه‌ای</h3><p>پاسخ هر سؤال فقط یک‌بار ثبت می‌شود.</p></div>
+      <div><span className="management-eyebrow">تمرین امتیازدار</span><h3>آزمون چهارگزینه‌ای</h3><p>جایزه هر سؤال فقط یک‌بار ثبت می‌شود.</p></div>
       <div className="student-quiz-reward-summary"><strong>⭐ {earnedPoints.toLocaleString('fa-IR')}</strong><span>امتیاز</span><strong>🪙 {earnedCoins.toLocaleString('fa-IR')}</strong><span>سکه این درس</span></div>
     </div>
     {error && <div className="notice error-notice" role="alert">{error}</div>}
