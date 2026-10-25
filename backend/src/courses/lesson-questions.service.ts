@@ -60,7 +60,7 @@ export class LessonQuestionsService {
         options: question.options,
         points: question.points,
         coins: question.coins,
-        answered: Boolean(answer),
+        answered: Boolean(answer?.isCorrect),
         isCorrect: answer?.isCorrect ?? null,
         awardedPoints: answer?.awardedPoints ?? 0,
         awardedCoins: answer?.awardedCoins ?? 0,
@@ -87,26 +87,30 @@ export class LessonQuestionsService {
       where: { student: { id: studentId }, question: { id: questionId } },
       relations: { question: true },
     });
-    if (existing) {
+    if (existing?.isCorrect) {
       return {
         alreadyAnswered: true,
-        isCorrect: existing.isCorrect,
+        isCorrect: true,
         awardedPoints: existing.awardedPoints,
         awardedCoins: existing.awardedCoins,
         selectedOptionIndex: existing.selectedOptionIndex,
-        message: 'این سؤال قبلاً پاسخ داده شده است؛ جایزه دوباره ثبت نمی‌شود.',
+        message: 'این سؤال قبلاً درست پاسخ داده شده است؛ جایزه دوباره ثبت نمی‌شود.',
       };
     }
 
     const isCorrect = selectedOptionIndex === question.correctOptionIndex;
-    const answer = this.answerRepository.create({
+    const answer = existing ?? this.answerRepository.create({
       student: { id: studentId } as any,
       question,
       selectedOptionIndex,
       isCorrect,
-      awardedPoints: isCorrect ? question.points : 0,
-      awardedCoins: isCorrect ? question.coins : 0,
+      awardedPoints: 0,
+      awardedCoins: 0,
     });
+    answer.selectedOptionIndex = selectedOptionIndex;
+    answer.isCorrect = isCorrect;
+    answer.awardedPoints = isCorrect ? question.points : 0;
+    answer.awardedCoins = isCorrect ? question.coins : 0;
     try {
       const saved = await this.answerRepository.save(answer);
       return {
@@ -115,7 +119,7 @@ export class LessonQuestionsService {
         awardedPoints: saved.awardedPoints,
         awardedCoins: saved.awardedCoins,
         selectedOptionIndex: saved.selectedOptionIndex,
-        message: saved.isCorrect ? 'آفرین! پاسخ درست است و جایزه‌ات ثبت شد.' : 'این پاسخ درست نبود؛ این سؤال دیگر قابل پاسخ‌گویی نیست.',
+        message: saved.isCorrect ? 'آفرین! پاسخ درست است و جایزه‌ات ثبت شد.' : 'پاسخ درست نبود؛ می‌توانی دوباره تلاش کنی.',
       };
     } catch (error) {
       // A simultaneous second request must not award the same question twice.
