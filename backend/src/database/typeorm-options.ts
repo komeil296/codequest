@@ -8,6 +8,8 @@ import { Course } from '../courses/course.entity';
 import { Lesson } from '../courses/lesson.entity';
 import { CourseInstitutionAccess } from '../courses/course-institution-access.entity';
 import { CourseEnrollment } from '../courses/course-enrollment.entity';
+import { LessonQuestion } from '../courses/lesson-question.entity';
+import { LessonQuestionAnswer } from '../courses/lesson-question-answer.entity';
 
 export interface DatabaseEnvironment {
   DB_HOST?: string;
@@ -46,7 +48,7 @@ export function buildTypeOrmOptions(
     username: env.DB_USERNAME!,
     password: env.DB_PASSWORD!,
     database: env.DB_DATABASE!,
-    entities: [User, Institution, Course, Lesson, CourseInstitutionAccess, CourseEnrollment],
+    entities: [User, Institution, Course, Lesson, CourseInstitutionAccess, CourseEnrollment, LessonQuestion, LessonQuestionAnswer],
     migrations: [__dirname + '/migrations/*{.ts,.js}'],
     migrationsTableName: 'migrations',
     synchronize: false,
