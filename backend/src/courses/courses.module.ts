@@ -3,6 +3,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { Course } from './course.entity';
 import { Lesson } from './lesson.entity';
+import { LessonQuestion } from './lesson-question.entity';
+import { LessonQuestionAnswer } from './lesson-question-answer.entity';
 import { CourseInstitutionAccess } from './course-institution-access.entity';
 import { Institution } from '../institutions/institution.entity';
 import { CoursesController } from './courses.controller';
@@ -16,11 +18,14 @@ import { CourseEnrollmentController } from './course-enrollment.controller';
 import { CourseEnrollmentService } from './course-enrollment.service';
 import { StudentCourseController } from './student-course.controller';
 import { StudentCourseService } from './student-course.service';
+import { LessonQuestionsController } from './lesson-questions.controller';
+import { StudentLessonQuestionsController } from './student-lesson-questions.controller';
+import { LessonQuestionsService } from './lesson-questions.service';
 import { User } from '../users/user.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Course, Lesson, CourseInstitutionAccess, CourseEnrollment, Institution, User]),
+    TypeOrmModule.forFeature([Course, Lesson, CourseInstitutionAccess, CourseEnrollment, Institution, User, LessonQuestion, LessonQuestionAnswer]),
   ],
   controllers: [
     CoursesController,
@@ -28,8 +33,10 @@ import { User } from '../users/user.entity';
     CourseInstitutionAccessController,
     CourseEnrollmentController,
     StudentCourseController,
+    LessonQuestionsController,
+    StudentLessonQuestionsController,
   ],
-  providers: [CoursesService, LessonsService, CourseInstitutionAccessService, CourseEnrollmentService, StudentCourseService],
-  exports: [CoursesService, LessonsService, CourseInstitutionAccessService, CourseEnrollmentService, StudentCourseService],
+  providers: [CoursesService, LessonsService, CourseInstitutionAccessService, CourseEnrollmentService, StudentCourseService, LessonQuestionsService],
+  exports: [CoursesService, LessonsService, CourseInstitutionAccessService, CourseEnrollmentService, StudentCourseService, LessonQuestionsService],
 })
 export class CoursesModule {}
