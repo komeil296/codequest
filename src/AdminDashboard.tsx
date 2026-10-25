@@ -8,7 +8,8 @@ type Lesson = { id: string; courseId?: string; title: string; description: strin
 type Institution = { id: string; name: string; isActive: boolean; createdAt: string }
 type Student = { id: string; firstName: string; lastName: string; username: string; mobile: string | null; institutionId: string | null; institutionName?: string | null; isActive: boolean; createdAt: string }
 type CreatedStudent = { student: Student; temporaryPassword: string }
-type Tab = 'overview' | 'courses' | 'lessons' | 'students' | 'institutions'
+type InstitutionAdmin = { id: string; firstName: string; lastName: string; username: string; mobile: string; institutionId: string | null; institutionName?: string | null; isActive: boolean; createdAt: string }
+type Tab = 'overview' | 'courses' | 'lessons' | 'students' | 'institutions' | 'institution-admins'
 
 export default function AdminDashboard({ auth, onLogout, onBack }: Props) {
   const [tab, setTab] = useState<Tab>('overview')
@@ -16,6 +17,7 @@ export default function AdminDashboard({ auth, onLogout, onBack }: Props) {
   const [lessons, setLessons] = useState<Lesson[]>([])
   const [institutions, setInstitutions] = useState<Institution[]>([])
   const [students, setStudents] = useState<Student[]>([])
+  const [institutionAdmins, setInstitutionAdmins] = useState<InstitutionAdmin[]>([])
   const [selectedCourse, setSelectedCourse] = useState('')
   const [courseTitle, setCourseTitle] = useState('')
   const [courseDescription, setCourseDescription] = useState('')
@@ -23,6 +25,12 @@ export default function AdminDashboard({ auth, onLogout, onBack }: Props) {
   const [lessonDescription, setLessonDescription] = useState('')
   const [lessonOrder, setLessonOrder] = useState('0')
   const [institutionName, setInstitutionName] = useState('')
+  const [adminFirstName, setAdminFirstName] = useState('')
+  const [adminLastName, setAdminLastName] = useState('')
+  const [adminMobile, setAdminMobile] = useState('')
+  const [adminUsername, setAdminUsername] = useState('')
+  const [adminPassword, setAdminPassword] = useState('')
+  const [adminInstitution, setAdminInstitution] = useState('')
   const [studentFirstName, setStudentFirstName] = useState('')
   const [studentLastName, setStudentLastName] = useState('')
   const [studentMobile, setStudentMobile] = useState('')
@@ -51,6 +59,10 @@ export default function AdminDashboard({ auth, onLogout, onBack }: Props) {
     setStudents(await request<Student[]>('/users/admin/students'))
   }, [request])
 
+  const loadInstitutionAdmins = useCallback(async () => {
+    setInstitutionAdmins(await request<InstitutionAdmin[]>('/users/admin/institution-admins'))
+  }, [request])
+
   const loadLessons = useCallback(async (courseId: string) => {
     if (!courseId) { setLessons([]); return }
     setLessons(await request<Lesson[]>(`/courses/${courseId}/lessons`))
@@ -60,14 +72,16 @@ export default function AdminDashboard({ auth, onLogout, onBack }: Props) {
     setLoading(true)
     setError('')
     try {
-      const [courseItems, institutionItems, studentItems] = await Promise.all([
+      const [courseItems, institutionItems, studentItems, adminItems] = await Promise.all([
         request<Course[]>('/courses'),
         request<Institution[]>('/institutions/admin/all'),
         request<Student[]>('/users/admin/students'),
+        request<InstitutionAdmin[]>('/users/admin/institution-admins'),
       ])
       setCourses(courseItems)
       setInstitutions(institutionItems)
       setStudents(studentItems)
+      setInstitutionAdmins(adminItems)
       setSelectedCourse(current => current && courseItems.some(item => item.id === current) ? current : courseItems[0]?.id || '')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'دریافت اطلاعات پنل ناموفق بود.')
@@ -124,6 +138,36 @@ export default function AdminDashboard({ auth, onLogout, onBack }: Props) {
       await request<Institution>('/institutions', { method: 'POST', body: JSON.stringify({ name: institutionName.trim() }) })
       setInstitutionName('')
     }, 'مؤسسه ساخته شد و برای استفاده باید فعال شود.')
+  }
+
+  async function createInstitutionAdmin(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!adminInstitution) { setError('برای مدیر، یک مؤسسه فعال انتخاب کن.'); return }
+    await runAction(async () => {
+      await request<InstitutionAdmin>('/users/institution-admin', {
+        method: 'POST',
+        body: JSON.stringify({
+          firstName: adminFirstName.trim(),
+          lastName: adminLastName.trim(),
+          mobile: adminMobile.trim(),
+          username: adminUsername.trim(),
+          password: adminPassword,
+          institutionId: adminInstitution,
+        }),
+      })
+      setAdminFirstName('')
+      setAdminLastName('')
+      setAdminMobile('')
+      setAdminUsername('')
+      setAdminPassword('')
+    }, 'حساب مدیر مؤسسه ساخته شد.')
+  }
+
+  async function toggleInstitutionAdmin(admin: InstitutionAdmin) {
+    await runAction(
+      () => request(`/users/admin/institution-admins/${admin.id}/${admin.isActive ? 'deactivate' : 'activate'}`, { method: 'PATCH' }),
+      admin.isActive ? 'حساب مدیر مؤسسه غیرفعال شد.' : 'حساب مدیر مؤسسه فعال شد.',
+    )
   }
 
   async function createStudent(event: FormEvent<HTMLFormElement>) {
@@ -204,6 +248,7 @@ export default function AdminDashboard({ auth, onLogout, onBack }: Props) {
   }
 
   const filteredStudents = students.filter(student => `${student.firstName} ${student.lastName} ${student.username} ${student.institutionName || ''}`.toLowerCase().includes(search.toLowerCase()))
+  const filteredAdmins = institutionAdmins.filter(admin => `${admin.firstName} ${admin.lastName} ${admin.username} ${admin.mobile} ${admin.institutionName || ''}`.toLowerCase().includes(search.toLowerCase()))
   const filteredInstitutions = institutions.filter(item => item.name.toLowerCase().includes(search.toLowerCase()))
   const filteredCourses = courses.filter(item => item.title.toLowerCase().includes(search.toLowerCase()))
   const nav: { id: Tab; label: string; icon: string }[] = [
@@ -212,6 +257,7 @@ export default function AdminDashboard({ auth, onLogout, onBack }: Props) {
     { id: 'lessons', label: 'درس‌ها', icon: '▤' },
     { id: 'students', label: 'دانش‌آموزان', icon: '♙' },
     { id: 'institutions', label: 'مؤسسات', icon: '⌂' },
+    { id: 'institution-admins', label: 'مدیران مؤسسات', icon: '♧' },
   ]
 
   return <div className="admin-shell" dir="rtl">
@@ -235,6 +281,7 @@ export default function AdminDashboard({ auth, onLogout, onBack }: Props) {
       {tab === 'courses' && <section className="admin-work-grid"><form className="admin-panel admin-create-form" onSubmit={createCourse}><div className="admin-panel-heading"><span>＋</span><div><h2>ساخت دوره</h2><p>یک دوره آموزشی تازه تعریف کن.</p></div></div><label>عنوان دوره<input value={courseTitle} onChange={e => setCourseTitle(e.target.value)} minLength={2} maxLength={150} required placeholder="مثلاً JavaScript مقدماتی" /></label><label>توضیحات<textarea value={courseDescription} onChange={e => setCourseDescription(e.target.value)} maxLength={5000} rows={4} placeholder="این دوره درباره چیست؟" /></label><button className="admin-primary" disabled={saving}>{saving ? 'در حال ذخیره…' : 'ساخت دوره'} <span>←</span></button></form><section className="admin-panel admin-list-panel"><div className="admin-panel-heading"><span>▣</span><div><h2>فهرست دوره‌ها</h2><p>{courses.length.toLocaleString('fa-IR')} دوره ثبت‌شده</p></div><input className="admin-search" value={search} onChange={e => setSearch(e.target.value)} placeholder="جست‌وجوی دوره…" /></div><div className="admin-table-wrap"><table><thead><tr><th>عنوان دوره</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody>{filteredCourses.map(course => <tr key={course.id}><td><strong>{course.title}</strong><small>{course.description || 'بدون توضیحات'}</small></td><td><span className={`admin-status ${course.isActive ? 'is-active' : 'is-inactive'}`}>{course.isActive ? 'فعال' : 'غیرفعال'}</span></td><td><div className="admin-row-actions"><button onClick={() => { setSelectedCourse(course.id); setTab('lessons') }}>درس‌ها</button><button onClick={() => void editCourse(course)}>ویرایش</button><button onClick={() => void toggleCourse(course)}>{course.isActive ? 'غیرفعال' : 'فعال‌سازی'}</button></div></td></tr>)}</tbody></table>{filteredCourses.length === 0 && <div className="admin-empty">هنوز دوره‌ای ثبت نشده است.</div>}</div></section></section>}
       {tab === 'lessons' && <section className="admin-work-grid"><form className="admin-panel admin-create-form" onSubmit={createLesson}><div className="admin-panel-heading"><span>＋</span><div><h2>تعریف درس</h2><p>ابتدا دوره و سپس مشخصات درس را وارد کن.</p></div></div><label>دوره<select value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)} required><option value="">انتخاب دوره</option>{courses.map(course => <option key={course.id} value={course.id}>{course.title}{course.isActive ? '' : ' (غیرفعال)'}</option>)}</select></label><label>عنوان درس<input value={lessonTitle} onChange={e => setLessonTitle(e.target.value)} minLength={2} maxLength={150} required placeholder="مثلاً آشنایی با متغیرها" /></label><label>توضیحات<textarea value={lessonDescription} onChange={e => setLessonDescription(e.target.value)} maxLength={5000} rows={3} placeholder="خلاصه‌ای از درس" /></label><label>ترتیب نمایش<input type="number" min="0" max="100000" value={lessonOrder} onChange={e => setLessonOrder(e.target.value)} required /></label><button className="admin-primary" disabled={saving || !selectedCourse}>{saving ? 'در حال ذخیره…' : 'افزودن درس'} <span>←</span></button></form><section className="admin-panel admin-list-panel"><div className="admin-panel-heading"><span>▤</span><div><h2>درس‌های دوره</h2><p>{courses.find(c => c.id === selectedCourse)?.title || 'یک دوره انتخاب کن'}</p></div></div><div className="admin-lesson-list">{lessons.map(lesson => <article key={lesson.id}><span className="admin-lesson-order">{(lesson.sortOrder + 1).toLocaleString('fa-IR')}</span><div className="admin-lesson-info"><strong>{lesson.title}</strong><small>{lesson.description || 'بدون توضیحات'}</small></div><span className={`admin-status ${lesson.isActive ? 'is-active' : 'is-inactive'}`}>{lesson.isActive ? 'فعال' : 'غیرفعال'}</span><div className="admin-row-actions"><button onClick={() => void editLesson(lesson)}>ویرایش</button><button onClick={() => void toggleLesson(lesson)}>{lesson.isActive ? 'غیرفعال' : 'فعال‌سازی'}</button></div></article>)}{lessons.length === 0 && <div className="admin-empty">برای این دوره هنوز درسی تعریف نشده است.</div>}</div></section></section>}
       {tab === 'students' && <section className="admin-work-grid"><form className="admin-panel admin-create-form" onSubmit={createStudent}><div className="admin-panel-heading"><span>＋</span><div><h2>ثبت دانش‌آموز</h2><p>حساب دانش‌آموز را به یک مؤسسه فعال وصل کن.</p></div></div><label>نام<input value={studentFirstName} onChange={e => setStudentFirstName(e.target.value)} maxLength={80} required /></label><label>نام خانوادگی<input value={studentLastName} onChange={e => setStudentLastName(e.target.value)} maxLength={100} required /></label><label>شماره موبایل <small>اختیاری</small><input value={studentMobile} onChange={e => setStudentMobile(e.target.value)} maxLength={20} /></label><label>مؤسسه<select value={studentInstitution} onChange={e => setStudentInstitution(e.target.value)} required><option value="">انتخاب مؤسسه فعال</option>{institutions.filter(x => x.isActive).map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label><button className="admin-primary" disabled={saving || !institutions.some(x => x.isActive)}>{saving ? 'در حال ذخیره…' : 'ساخت حساب دانش‌آموز'} <span>←</span></button></form><section className="admin-panel admin-list-panel"><div className="admin-panel-heading"><span>♙</span><div><h2>همه دانش‌آموزان</h2><p>{students.length.toLocaleString('fa-IR')} حساب در تمام مؤسسات</p></div><input className="admin-search" value={search} onChange={e => setSearch(e.target.value)} placeholder="جست‌وجو…" /></div>{createdStudent && <div className="admin-credentials"><strong>اطلاعات ورود — این رمز را ذخیره کن</strong><p>نام کاربری: <code>{createdStudent.student.username}</code></p><p>رمز موقت: <code>{createdStudent.temporaryPassword}</code></p><button onClick={() => void navigator.clipboard?.writeText(`نام کاربری: ${createdStudent.student.username}\nرمز موقت: ${createdStudent.temporaryPassword}`)}>کپی اطلاعات ورود</button></div>}<div className="admin-table-wrap"><table><thead><tr><th>دانش‌آموز</th><th>مؤسسه</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody>{filteredStudents.map(student => <tr key={student.id}><td><strong>{student.firstName} {student.lastName}</strong><small>{student.username} · {student.mobile || 'بدون موبایل'}</small></td><td>{student.institutionName || 'بدون مؤسسه'}</td><td><span className={`admin-status ${student.isActive ? 'is-active' : 'is-inactive'}`}>{student.isActive ? 'فعال' : 'غیرفعال'}</span></td><td><div className="admin-row-actions"><button onClick={() => void changeStudentPassword(student)}>تغییر رمز</button><button onClick={() => void toggleStudent(student)}>{student.isActive ? 'غیرفعال' : 'فعال‌سازی'}</button><button className="admin-danger" onClick={() => void deleteStudent(student)}>حذف</button></div></td></tr>)}</tbody></table>{filteredStudents.length === 0 && <div className="admin-empty">دانش‌آموزی پیدا نشد.</div>}</div></section></section>}
+      {tab === 'institution-admins' && <section className="admin-work-grid"><form className="admin-panel admin-create-form" onSubmit={createInstitutionAdmin}><div className="admin-panel-heading"><span>＋</span><div><h2>ساخت مدیر مؤسسه</h2><p>برای هر مؤسسه حساب مدیریتی بساز.</p></div></div><label>نام<input value={adminFirstName} onChange={e => setAdminFirstName(e.target.value)} maxLength={80} required /></label><label>نام خانوادگی<input value={adminLastName} onChange={e => setAdminLastName(e.target.value)} maxLength={100} required /></label><label>شماره موبایل<input value={adminMobile} onChange={e => setAdminMobile(e.target.value)} maxLength={20} required /></label><label>نام کاربری<input value={adminUsername} onChange={e => setAdminUsername(e.target.value)} maxLength={50} required /></label><label>رمز عبور <small>حداقل ۱۰ کاراکتر</small><input type="password" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} minLength={10} maxLength={72} required /></label><label>مؤسسه<select value={adminInstitution} onChange={e => setAdminInstitution(e.target.value)} required><option value="">انتخاب مؤسسه فعال</option>{institutions.filter(item => item.isActive).map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label><button className="admin-primary" disabled={saving || !institutions.some(item => item.isActive)}>{saving ? 'در حال ذخیره…' : 'ساخت حساب مدیر'} <span>←</span></button><p className="admin-help">نام کاربری و رمز عبور را در اختیار مدیر مؤسسه قرار بده.</p></form><section className="admin-panel admin-list-panel"><div className="admin-panel-heading"><span>♧</span><div><h2>مدیران مؤسسات</h2><p>{institutionAdmins.length.toLocaleString('fa-IR')} حساب مدیر ثبت‌شده</p></div><input className="admin-search" value={search} onChange={e => setSearch(e.target.value)} placeholder="جست‌وجوی مدیر…" /></div><div className="admin-table-wrap"><table><thead><tr><th>مدیر</th><th>مؤسسه</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody>{filteredAdmins.map(admin => <tr key={admin.id}><td><strong>{admin.firstName} {admin.lastName}</strong><small>{admin.username} · {admin.mobile}</small></td><td>{admin.institutionName || 'بدون مؤسسه'}</td><td><span className={`admin-status ${admin.isActive ? 'is-active' : 'is-inactive'}`}>{admin.isActive ? 'فعال' : 'غیرفعال'}</span></td><td><div className="admin-row-actions"><button onClick={() => void toggleInstitutionAdmin(admin)}>{admin.isActive ? 'غیرفعال‌سازی' : 'فعال‌سازی'}</button></div></td></tr>)}</tbody></table>{filteredAdmins.length === 0 && <div className="admin-empty">مدیر مؤسسه‌ای پیدا نشد.</div>}</div></section></section>}
       {tab === 'institutions' && <section className="admin-work-grid"><form className="admin-panel admin-create-form" onSubmit={createInstitution}><div className="admin-panel-heading"><span>＋</span><div><h2>ثبت مؤسسه</h2><p>مؤسسه جدید پس از ساخت غیرفعال خواهد بود.</p></div></div><label>نام مؤسسه<input value={institutionName} onChange={e => setInstitutionName(e.target.value)} minLength={2} maxLength={150} required placeholder="مثلاً آموزشگاه فنی" /></label><button className="admin-primary" disabled={saving}>{saving ? 'در حال ذخیره…' : 'ساخت مؤسسه'} <span>←</span></button><p className="admin-help">پس از فعال‌سازی مؤسسه، می‌توانی دانش‌آموزان را به آن اختصاص بدهی.</p></form><section className="admin-panel admin-list-panel"><div className="admin-panel-heading"><span>⌂</span><div><h2>فهرست مؤسسات</h2><p>{institutions.length.toLocaleString('fa-IR')} مؤسسه ثبت‌شده</p></div><input className="admin-search" value={search} onChange={e => setSearch(e.target.value)} placeholder="جست‌وجوی مؤسسه…" /></div><div className="admin-table-wrap"><table><thead><tr><th>نام مؤسسه</th><th>تاریخ ایجاد</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody>{filteredInstitutions.map(item => <tr key={item.id}><td><strong>{item.name}</strong></td><td>{new Date(item.createdAt).toLocaleDateString('fa-IR')}</td><td><span className={`admin-status ${item.isActive ? 'is-active' : 'is-inactive'}`}>{item.isActive ? 'فعال' : 'غیرفعال'}</span></td><td><div className="admin-row-actions"><button onClick={() => void editInstitution(item)}>ویرایش</button><button onClick={() => void toggleInstitution(item)}>{item.isActive ? 'غیرفعال‌سازی' : 'فعال‌سازی'}</button></div></td></tr>)}</tbody></table>{filteredInstitutions.length === 0 && <div className="admin-empty">مؤسسه‌ای پیدا نشد.</div>}</div></section></section>}
       <footer className="admin-footer"><span>CodeQuest</span><span>مدیریت مسیرهای یادگیری، یک قدم در هر بار ✦</span></footer>
     </main>
