@@ -46,7 +46,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     if (
-      user.role === UserRole.INSTITUTION_ADMIN &&
+      user.role !== UserRole.SUPER_ADMIN &&
       (!user.institution || !user.institution.isActive)
     ) {
       throw new UnauthorizedException('Institution is inactive');

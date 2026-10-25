@@ -140,10 +140,22 @@ export class UsersService {
           typeof error === 'object' &&
           error !== null &&
           'code' in error &&
-          (error as { code?: string }).code === '23505' &&
-          attempt < 4
+          (error as { code?: string }).code === '23505'
         ) {
-          continue;
+          const constraint = 'constraint' in error
+            ? (error as { constraint?: string }).constraint
+            : undefined;
+
+          if (constraint === 'UQ_d376a9f93bba651f32a2c03a7d3') {
+            throw new ConflictException('Mobile number already exists');
+          }
+
+          if (
+            constraint === 'UQ_fe0bb3f6520ee0469504521e710' &&
+            attempt < 4
+          ) {
+            continue;
+          }
         }
         throw error;
       }

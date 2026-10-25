@@ -35,7 +35,10 @@ export class AuthService {
       throw new UnauthorizedException('Mobile number is not verified');
     }
 
-    if (user.role === 'INSTITUTION_ADMIN' && !user.institution?.isActive) {
+    if (
+      user.role !== 'SUPER_ADMIN' &&
+      (!user.institution || !user.institution.isActive)
+    ) {
       throw new UnauthorizedException('Institution is inactive');
     }
 
