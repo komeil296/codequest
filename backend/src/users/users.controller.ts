@@ -21,6 +21,7 @@ import { Request } from 'express';
 import { UsersService } from './users.service';
 import { CreateInstitutionAdminDto } from './dto/create-institution-admin.dto';
 import { CreateStudentDto } from './dto/create-student.dto';
+import { CreateStudentForInstitutionDto } from './dto/create-student-for-institution.dto';
 import { ChangeStudentPasswordDto } from './dto/change-student-password.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -40,6 +41,63 @@ interface AuthenticatedRequest extends Request {
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @Post('admin/students')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.SUPER_ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create a student for a selected institution (super admin only)' })
+  createStudentForInstitution(@Body() dto: CreateStudentForInstitutionDto) {
+    return this.usersService.createStudent(dto.institutionId, dto);
+  }
+
+  @Get('admin/students')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.SUPER_ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List all students across institutions (super admin only)' })
+  listAllStudents() {
+    return this.usersService.listAllStudents();
+  }
+
+  @Patch('admin/students/:studentId/deactivate')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.SUPER_ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Deactivate a student (super admin only)' })
+  deactivateAnyStudent(@Param('studentId') studentId: string) {
+    return this.usersService.setStudentActive(studentId, false);
+  }
+
+  @Patch('admin/students/:studentId/activate')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.SUPER_ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Reactivate a student (super admin only)' })
+  activateAnyStudent(@Param('studentId') studentId: string) {
+    return this.usersService.setStudentActive(studentId, true);
+  }
+
+  @Patch('admin/students/:studentId/password')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.SUPER_ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Change a student password (super admin only)' })
+  changeAnyStudentPassword(
+    @Param('studentId') studentId: string,
+    @Body() dto: ChangeStudentPasswordDto,
+  ) {
+    return this.usersService.changeStudentPasswordById(studentId, dto.password);
+  }
+
+  @Delete('admin/students/:studentId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.SUPER_ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete a student (super admin only)' })
+  deleteAnyStudent(@Param('studentId') studentId: string) {
+    return this.usersService.deleteStudentById(studentId);
+  }
 
   @Post('institution-admin')
   @UseGuards(JwtAuthGuard, RolesGuard)
