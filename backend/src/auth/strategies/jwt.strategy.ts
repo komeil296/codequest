@@ -41,7 +41,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException();
     }
 
-    if (user.mobile && !user.mobileVerified) {
+    // Only students are subject to mobile verification. Institution admins
+    // currently have no verification flow, so they must not be locked out.
+    if (
+      user.role === UserRole.STUDENT &&
+      user.mobile &&
+      !user.mobileVerified
+    ) {
       throw new UnauthorizedException('Mobile number is not verified');
     }
 
