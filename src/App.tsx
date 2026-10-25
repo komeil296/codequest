@@ -4,6 +4,7 @@ import './App.css'
 import Mission from './Mission'
 import Login from './Login'
 import StudentManagement from './StudentManagement'
+import StudentCourses from './StudentCourses'
 import AdminDashboard from './AdminDashboard'
 import type { AuthUser } from './api'
 type Lesson = {
@@ -33,7 +34,7 @@ const lessons: Lesson[] = [
 function App() {
   const [activeLesson, setActiveLesson] = useState(2)
   const [showAll, setShowAll] = useState(false)
-  const [page, setPage] = useState<'dashboard' | 'mission' | 'login' | 'students' | 'admin'>('dashboard')
+  const [page, setPage] = useState<'dashboard' | 'mission' | 'login' | 'students' | 'admin' | 'student-courses'>('dashboard')
   const [auth, setAuth] = useState<{ token: string; user: AuthUser } | null>(() => {
     const token = localStorage.getItem('codequest_token')
     const rawUser = localStorage.getItem('codequest_user')
@@ -50,12 +51,21 @@ if (page === 'mission') {
       localStorage.setItem('codequest_token', result.accessToken)
       localStorage.setItem('codequest_user', JSON.stringify(result.user))
       setAuth({ token: result.accessToken, user: result.user })
-      setPage(result.user.role === 'INSTITUTION_ADMIN' ? 'students' : result.user.role === 'SUPER_ADMIN' ? 'admin' : 'dashboard')
+      setPage(result.user.role === 'INSTITUTION_ADMIN' ? 'students' : result.user.role === 'SUPER_ADMIN' ? 'admin' : 'student-courses')
     }} />
   }
 
   if (page === 'admin' && auth?.user.role === 'SUPER_ADMIN') {
     return <AdminDashboard auth={auth} onBack={() => setPage('dashboard')} onLogout={() => {
+      localStorage.removeItem('codequest_token')
+      localStorage.removeItem('codequest_user')
+      setAuth(null)
+      setPage('dashboard')
+    }} />
+  }
+
+  if (page === 'student-courses' && auth?.user.role === 'STUDENT') {
+    return <StudentCourses auth={auth} onBack={() => setPage('dashboard')} onLogout={() => {
       localStorage.removeItem('codequest_token')
       localStorage.removeItem('codequest_user')
       setAuth(null)
@@ -123,8 +133,8 @@ if (page === 'mission') {
             <p className="eyebrow">آماده‌ای چیزی بسازی؟</p>
             <h1>سلام، قهرمان! <span>👋</span></h1>
           </div>
-          <button className="teacher-button" onClick={() => setPage(auth?.user.role === 'INSTITUTION_ADMIN' ? 'students' : auth?.user.role === 'SUPER_ADMIN' ? 'admin' : 'login')}>
-            <span>♙</span> {auth?.user.role === 'INSTITUTION_ADMIN' ? 'مدیریت دانش‌آموزان' : auth?.user.role === 'SUPER_ADMIN' ? 'ورود به پنل مدیریت' : 'ورود مدیر / معلم'}
+          <button className="teacher-button" onClick={() => setPage(auth?.user.role === 'INSTITUTION_ADMIN' ? 'students' : auth?.user.role === 'SUPER_ADMIN' ? 'admin' : auth?.user.role === 'STUDENT' ? 'student-courses' : 'login')}>
+            <span>♙</span> {auth?.user.role === 'INSTITUTION_ADMIN' ? 'مدیریت دانش‌آموزان' : auth?.user.role === 'SUPER_ADMIN' ? 'ورود به پنل مدیریت' : auth?.user.role === 'STUDENT' ? 'دوره‌های من' : 'ورود مدیر / معلم'}
           </button>
         </header>
 
