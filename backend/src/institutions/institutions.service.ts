@@ -1,4 +1,3 @@
-
 import {
   Injectable,
   NotFoundException,
@@ -33,6 +32,13 @@ export class InstitutionsService {
       isActive: false,
     });
 
+    return this.institutionRepository.save(institution);
+  }
+
+  async update(id: string, dto: CreateInstitutionDto) {
+    const institution = await this.institutionRepository.findOne({ where: { id } });
+    if (!institution) throw new NotFoundException('Institution not found');
+    institution.name = dto.name.trim();
     return this.institutionRepository.save(institution);
   }
 
