@@ -34,12 +34,23 @@ const lessons: Lesson[] = [
 function App() {
   const [activeLesson, setActiveLesson] = useState(2)
   const [showAll, setShowAll] = useState(false)
-  const [page, setPage] = useState<'dashboard' | 'mission' | 'login' | 'students' | 'admin' | 'student-courses'>('dashboard')
   const [auth, setAuth] = useState<{ token: string; user: AuthUser } | null>(() => {
     const token = localStorage.getItem('codequest_token')
     const rawUser = localStorage.getItem('codequest_user')
     if (!token || !rawUser) return null
     try { return { token, user: JSON.parse(rawUser) as AuthUser } } catch { return null }
+  })
+  const [page, setPage] = useState<'dashboard' | 'mission' | 'login' | 'students' | 'admin' | 'student-courses'>(() => {
+    const token = localStorage.getItem('codequest_token')
+    const rawUser = localStorage.getItem('codequest_user')
+    if (!token || !rawUser) return 'dashboard'
+    try {
+      const user = JSON.parse(rawUser) as AuthUser
+      if (user.role === 'INSTITUTION_ADMIN') return 'students'
+      if (user.role === 'SUPER_ADMIN') return 'admin'
+      if (user.role === 'STUDENT') return 'student-courses'
+    } catch { /* اطلاعات ذخیره‌شده معتبر نیست */ }
+    return 'dashboard'
   })
 
 if (page === 'mission') {
