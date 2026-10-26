@@ -280,4 +280,3 @@ export default function StudentManagement({ auth, onBack, onLogout }: Props) {
     </div>
   </div>
 }
-}
