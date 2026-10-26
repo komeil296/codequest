@@ -37,6 +37,7 @@ function App() {
   const [auth, setAuth] = useState<{ token: string; user: AuthUser } | null>(null)
 
   useEffect(() => {
+    localStorage.removeItem('codequest_token')
     let cancelled = false
     restoreSession().then(result => {
       if (cancelled) return
