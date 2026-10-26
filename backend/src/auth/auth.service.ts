@@ -37,6 +37,21 @@ export class AuthService {
     };
   }
 
+  async createSessionForUser(userId: string) {
+    const refreshToken = this.createOpaqueToken();
+    const csrfToken = this.createOpaqueToken();
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    const session = this.sessionRepository.create({
+      userId,
+      refreshTokenHash: this.hashToken(refreshToken),
+      csrfTokenHash: this.hashToken(csrfToken),
+      expiresAt,
+      revokedAt: null,
+    });
+    await this.sessionRepository.save(session);
+    return { refreshToken, csrfToken, expiresAt };
+  }
+
   async login(username: string, password: string) {
     const user = await this.userRepository
       .createQueryBuilder('user')
