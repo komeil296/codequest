@@ -21,10 +21,10 @@ export class AuthService {
     return createHash('sha256').update(token).digest('hex');
   }
 
-  private tokensMatch(left: string, right: string): boolean {
-    const leftBuffer = Buffer.from(this.hashToken(left), 'hex');
-    const rightBuffer = Buffer.from(this.hashToken(right), 'hex');
-    return leftBuffer.length === rightBuffer.length && timingSafeEqual(leftBuffer, rightBuffer);
+  private tokensMatch(token: string, storedHash: string): boolean {
+    const tokenHash = Buffer.from(this.hashToken(token), 'hex');
+    const expectedHash = Buffer.from(storedHash, 'hex');
+    return tokenHash.length === expectedHash.length && timingSafeEqual(tokenHash, expectedHash);
   }
 
   private createOpaqueToken(): string {
