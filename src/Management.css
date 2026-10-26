@@ -226,3 +226,87 @@
  .student-avatar{width:36px;height:36px}.student-actions{grid-column:1/-1;padding-inline-start:44px}
  .management-page .credential-grid{grid-template-columns:1fr}
 }
+
+
+/* Institution admin information architecture */
+.institution-layout{display:grid;grid-template-columns:258px minmax(0,1fr);direction:rtl;min-height:100vh}
+.institution-sidebar{position:sticky;top:0;display:flex;flex-direction:column;align-self:start;min-height:100vh;padding:22px 14px 16px;background:#343a40;color:#c2c7d0}
+.institution-sidebar-brand{display:flex;align-items:center;gap:11px;padding:0 9px 22px;border-bottom:1px solid #4b545c}
+.institution-brand-mark{display:grid;place-items:center;width:38px;height:38px;border-radius:5px;background:#007bff;color:#fff;font-size:23px;font-weight:800}
+.institution-sidebar-brand div,.institution-user div{display:grid;gap:4px}
+.institution-sidebar-brand strong{color:#fff;font-size:18px}.institution-sidebar-brand small{color:#adb5bd;font-size:10px}
+.institution-user{display:flex;align-items:center;gap:10px;margin:18px 5px 24px;padding:0 4px 18px;border-bottom:1px solid #4b545c}
+.institution-user-avatar{display:grid;place-items:center;width:38px;height:38px;border:1px solid #6c757d;border-radius:50%;background:#495057;color:#fff;font-size:12px;font-weight:700}
+.institution-user strong{color:#f8f9fa;font-size:11px}.institution-user small{color:#adb5bd;font-size:10px}
+.institution-nav-caption{margin:0 10px 9px;color:#adb5bd;font-size:10px;font-weight:700}
+.institution-nav{display:grid;gap:4px}
+.institution-nav button{display:flex;align-items:center;gap:11px;width:100%;padding:11px 12px;border:0;border-radius:4px;background:transparent;color:#c2c7d0;text-align:right;font:inherit;font-size:12px;cursor:pointer}
+.institution-nav button>span{display:inline-grid;place-items:center;width:20px;color:#adb5bd;font-size:17px}
+.institution-nav button small{margin-inline-start:auto;padding:2px 7px;border-radius:3px;background:#6c757d;color:#fff;font-size:10px}
+.institution-nav button:hover{background:#ffffff12;color:#fff}
+.institution-nav button.active{background:#007bff;color:#fff;box-shadow:0 2px 4px #0002}
+.institution-nav button.active>span{color:#fff}
+.institution-sidebar-bottom{margin-top:auto;padding-top:20px}
+.institution-sidebar-bottom p{padding:0 9px;color:#adb5bd;font-size:10px;line-height:1.9}
+.institution-sidebar-bottom button{display:flex;align-items:center;gap:9px;width:100%;padding:11px 12px;border:1px solid #5a6268;border-radius:4px;background:transparent;color:#f8f9fa;font:inherit;font-size:11px;cursor:pointer}
+.institution-sidebar-bottom button:hover{background:#495057}
+.institution-main{min-width:0}
+.institution-topbar{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:15px;min-height:66px;padding:12px clamp(16px,2.5vw,32px);border-bottom:1px solid #dee2e6;background:#fff;box-shadow:0 1px 2px #00000008}
+.institution-topbar>div:first-child{display:grid;gap:4px}.institution-topbar-kicker{color:#6c757d;font-size:10px}.institution-topbar strong{color:#343a40;font-size:15px}
+.institution-topbar-actions{display:flex;align-items:center;gap:12px}.institution-current-user{color:#6c757d;font-size:11px}
+.institution-content{max-width:none;padding:26px clamp(16px,2.5vw,32px) 42px}
+.institution-page-heading{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:22px}
+.institution-page-heading h1{margin:0;color:#343a40;font-size:25px;font-weight:700}
+.institution-page-heading .muted-text{margin:7px 0 0}
+.institution-heading-count{display:grid;justify-items:center;min-width:95px;padding:10px 14px;border:1px solid #dee2e6;border-radius:4px;background:#fff}
+.institution-heading-count strong{color:#007bff;font-size:22px}.institution-heading-count span{color:#6c757d;font-size:10px}
+.institution-stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px;margin-bottom:20px}
+.institution-stat-card{display:grid;justify-items:start;gap:8px;min-width:0;padding:18px;border:1px solid #dee2e6;border-radius:4px;background:#fff;color:#343a40;text-align:right;font:inherit;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.institution-stat-card:hover{border-color:#b8daff;box-shadow:0 3px 10px #007bff0b}
+.institution-stat-icon{display:grid;place-items:center;width:38px;height:38px;border-radius:4px;font-size:20px}
+.institution-stat-icon.blue{background:#e7f1ff;color:#007bff}.institution-stat-icon.green{background:#e1f5e9;color:#218838}.institution-stat-icon.purple{background:#eee8ff;color:#6f42c1}.institution-stat-icon.amber{background:#fff3cd;color:#856404}
+.institution-stat-card>span:nth-child(2){color:#6c757d;font-size:11px}
+.institution-stat-card strong{font-size:25px;font-weight:700}.institution-stat-card small{color:#007bff;font-size:10px}
+.institution-overview-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
+.institution-quick-panel,.institution-recent-panel{min-width:0}
+.institution-quick-link{display:flex;align-items:center;gap:12px;width:100%;padding:14px 0;border:0;border-top:1px solid #e9ecef;background:#fff;color:#343a40;text-align:right;font:inherit;cursor:pointer}
+.institution-quick-link:hover strong{color:#007bff}
+.quick-link-icon{display:grid;place-items:center;flex-shrink:0;width:38px;height:38px;border-radius:4px;background:#eaf4ff;color:#007bff;font-size:20px}
+.institution-quick-link>span:nth-child(2){display:grid;gap:5px;min-width:0}
+.institution-quick-link strong{font-size:12px}.institution-quick-link small{color:#6c757d;font-size:10px;line-height:1.8}
+.institution-quick-link>b{margin-inline-start:auto;color:#007bff}
+.institution-view-all{width:100%;padding:11px;border:0;border-top:1px solid #e9ecef;background:#fff;color:#007bff;text-align:right;font:inherit;font-size:11px;cursor:pointer}
+.institution-student-columns{grid-template-columns:minmax(260px,.75fr) minmax(0,1.5fr)}
+.institution-course-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.institution-course-card{display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+.institution-course-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:4px;background:#eaf4ff;color:#007bff;font-size:22px}
+.institution-course-card h2{margin:0;color:#343a40;font-size:15px}
+.institution-course-card p{flex:1;margin:0;color:#6c757d;font-size:11px;line-height:1.9}
+.institution-course-card .primary-button{margin-top:6px}
+.institution-selected-course{margin:0 0 18px;padding:10px 12px;border-right:3px solid #007bff;background:#f1f7ff;color:#495057;font-size:11px;line-height:1.9}
+@media(max-width:1100px){.institution-layout{grid-template-columns:220px minmax(0,1fr)}.institution-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.institution-course-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.institution-overview-grid{grid-template-columns:1fr}}
+@media(max-width:760px){
+ .institution-layout{grid-template-columns:1fr}
+ .institution-sidebar{position:static;min-height:0;padding:12px}
+ .institution-sidebar-brand{padding-bottom:12px}
+ .institution-user,.institution-nav-caption,.institution-sidebar-bottom p{display:none}
+ .institution-nav{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:12px}
+ .institution-nav button{padding:10px;font-size:11px}
+ .institution-sidebar-bottom{margin-top:10px;padding-top:0}
+ .institution-sidebar-bottom button{justify-content:center;padding:8px}
+ .institution-topbar{position:static;min-height:58px}
+ .institution-current-user{display:none}
+ .institution-content{padding-top:18px}
+ .institution-page-heading{align-items:flex-start}
+ .institution-page-heading h1{font-size:22px}
+ .institution-student-columns{grid-template-columns:1fr}
+}
+@media(max-width:520px){
+ .institution-stat-grid{gap:9px}
+ .institution-stat-card{padding:13px}
+ .institution-stat-card strong{font-size:22px}
+ .institution-course-grid{grid-template-columns:1fr}
+ .institution-page-heading{flex-wrap:wrap}
+ .institution-heading-count{min-width:80px}
+ .institution-topbar-actions .secondary-button{padding:7px 9px}
+}
