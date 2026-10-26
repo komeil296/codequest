@@ -73,7 +73,6 @@ export class AuthService {
       institutionId,
     };
 
-    // Refresh-session support is being added in small, reviewable steps.
     return {
       accessToken: await this.jwtService.signAsync(payload),
       user: {
