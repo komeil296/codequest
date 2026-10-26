@@ -20,7 +20,23 @@ export class AuthController {
   @ApiOperation({ summary: 'Log in with username and password' })
   @ApiOkResponse({ description: 'Login successful; returns an access token.' })
   @ApiUnauthorizedResponse({ description: 'Invalid credentials or unverified mobile.' })
-  login(@Body() dto: LoginDto) {
-    return this.authService.login(dto.username, dto.password);
+  async login(@Body() dto: LoginDto, @Res({ passthrough: true }) response: Response) {
+    const result = await this.authService.login(dto.username, dto.password);
+    response.cookie('codequest_refresh', result.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      expires: new Date(result.expiresAt),
+    });
+    response.cookie('codequest_csrf', result.csrfToken, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      expires: new Date(result.expiresAt),
+    });
+    const { refreshToken, csrfToken, expiresAt, ...publicResult } = result;
+    return publicResult;
   }
 }
