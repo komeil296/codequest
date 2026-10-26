@@ -33,17 +33,98 @@ export type CreatedStudent = {
 }
 
 const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3000').replace(/\/$/, '')
+let accessTokenInMemory: string | null = null
+
+export function setAccessToken(token: string | null) {
+  accessTokenInMemory = token
+}
+
+function readCookie(name: string): string | null {
+  const item = document.cookie.split(';').map(value => value.trim()).find(value => value.startsWith(`${name}=`))
+  if (!item) return null
+  try {
+    return decodeURIComponent(item.slice(name.length + 1))
+  } catch {
+    return null
+  }
+}
+
+async function refreshAccessToken(): Promise<LoginResponse> {
+  const csrfToken = readCookie('codequest_csrf')
+  if (!csrfToken) throw new Error('نشست شما منقضی شده است. دوباره وارد شوید.')
+  const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { Accept: 'application/json', 'X-CSRF-Token': csrfToken },
+  })
+  if (!response.ok) {
+    setAccessToken(null)
+    throw new Error('نشست شما منقضی شده است. دوباره وارد شوید.')
+  }
+  const result = await response.json() as LoginResponse
+  setAccessToken(result.accessToken)
+  return result
+}
+
+export async function restoreSession(): Promise<LoginResponse | null> {
+  try {
+    return await refreshAccessToken()
+  } catch {
+    setAccessToken(null)
+    return null
+  }
+}
+
+export async function logoutSession(): Promise<void> {
+  const csrfToken = readCookie('codequest_csrf')
+  try {
+    await fetch(`${API_BASE_URL}/auth/logout`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: csrfToken ? { 'X-CSRF-Token': csrfToken } : {},
+    })
+  } finally {
+    setAccessToken(null)
+  }
+}
 
 export async function apiRequest<T>(path: string, init: RequestInit & { token?: string } = {}): Promise<T> {
   const headers = new Headers(init.headers)
   headers.set('Accept', 'application/json')
   if (init.body) headers.set('Content-Type', 'application/json')
-  if (init.token) headers.set('Authorization', `Bearer ${init.token}`)
+  const csrfToken = path === '/auth/refresh' || path === '/auth/logout' ? readCookie('codequest_csrf') : null
+  if (csrfToken) headers.set('X-CSRF-Token', csrfToken)
+
+  const makeRequest = (token: string | null) => {
+    const requestHeaders = new Headers(headers)
+    const effectiveToken = accessTokenInMemory ?? token
+    if (effectiveToken) requestHeaders.set('Authorization', `Bearer ${effectiveToken}`)
+    else requestHeaders.delete('Authorization')
+    return fetch(`${API_BASE_URL}${path}`, {
+      ...init,
+      headers: requestHeaders,
+      credentials: 'include',
+    })
+  }
 
   let response: Response
   try {
-    response = await fetch(`${API_BASE_URL}${path}`, { ...init, headers, credentials: 'include' })
-  } catch {
+    response = await makeRequest(init.token ?? null)
+    if (
+      response.status === 401 &&
+      path !== '/auth/login' &&
+      path !== '/auth/refresh' &&
+      path !== '/auth/logout'
+    ) {
+      try {
+        await refreshAccessToken()
+        response = await makeRequest(accessTokenInMemory)
+      } catch {
+        throw new Error('ورود شما منقضی شده است. دوباره وارد شوید.')
+      }
+    }
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('منقضی شده')) throw error
     throw new Error('ارتباط با سرور برقرار نشد. مطمئن شو بک‌اند روی پورت 3000 در حال اجراست.')
   }
 
