@@ -7,6 +7,7 @@ import {
   Res,
   Req,
   UnauthorizedException,
+  TooManyRequestsException,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import {
@@ -17,6 +18,39 @@ import {
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
+
+const LOGIN_WINDOW_MS = 15 * 60 * 1000;
+const LOGIN_MAX_FAILURES = 10;
+const loginFailures = new Map<string, { count: number; windowStartedAt: number }>();
+
+function assertLoginAllowed(request: Request): string {
+  const key = request.ip || request.socket.remoteAddress || 'unknown';
+  const now = Date.now();
+  const current = loginFailures.get(key);
+
+  if (!current || now - current.windowStartedAt >= LOGIN_WINDOW_MS) {
+    loginFailures.set(key, { count: 0, windowStartedAt: now });
+  } else if (current.count >= LOGIN_MAX_FAILURES) {
+    throw new TooManyRequestsException('Too many login attempts. Please try again in 15 minutes.');
+  }
+
+  if (loginFailures.size > 5000) {
+    for (const [entryKey, entry] of loginFailures) {
+      if (now - entry.windowStartedAt >= LOGIN_WINDOW_MS) loginFailures.delete(entryKey);
+    }
+  }
+
+  return key;
+}
+
+function recordLoginFailure(key: string): void {
+  const entry = loginFailures.get(key);
+  if (entry) entry.count += 1;
+}
+
+function clearLoginFailures(key: string): void {
+  loginFailures.delete(key);
+}
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
@@ -86,10 +120,24 @@ export class AuthController {
   @ApiOperation({ summary: 'Log in with username and password' })
   @ApiOkResponse({ description: 'Login successful; returns an access token.' })
   @ApiUnauthorizedResponse({ description: 'Invalid credentials or inactive account.' })
-  async login(@Body() dto: LoginDto, @Res({ passthrough: true }) response: Response) {
-    const result = await this.authService.login(dto.username, dto.password);
-    this.setSessionCookies(response, result);
-    return this.publicSessionResult(result);
+  async login(
+    @Body() dto: LoginDto,
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const rateLimitKey = assertLoginAllowed(request);
+
+    try {
+      const result = await this.authService.login(dto.username, dto.password);
+      clearLoginFailures(rateLimitKey);
+      this.setSessionCookies(response, result);
+      return this.publicSessionResult(result);
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        recordLoginFailure(rateLimitKey);
+      }
+      throw error;
+    }
   }
 
   @Post('refresh')
