@@ -97,7 +97,7 @@ export async function apiRequest<T>(path: string, init: RequestInit & { token?: 
 
   const makeRequest = (token: string | null) => {
     const requestHeaders = new Headers(headers)
-    const effectiveToken = accessTokenInMemory ?? token
+    const effectiveToken = accessTokenInMemory
     if (effectiveToken) requestHeaders.set('Authorization', `Bearer ${effectiveToken}`)
     else requestHeaders.delete('Authorization')
     return fetch(`${API_BASE_URL}${path}`, {
