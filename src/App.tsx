@@ -161,6 +161,25 @@ if (page === 'mission') {
           </button>
         </header>
 
+        <section className="platform-intro" aria-labelledby="platform-title">
+          <div className="platform-intro-copy">
+            <span className="platform-pill">محیط یکپارچه آموزش برنامه‌نویسی</span>
+            <h2 id="platform-title">یادگیری کدنویسی، با تمرین و مسیر روشن</h2>
+            <p>CodeQuest به دانش‌آموزان کمک می‌کند مهارت‌های برنامه‌نویسی را مرحله‌به‌مرحله یاد بگیرند؛ مدیران هم می‌توانند دوره‌ها، درس‌ها، آزمون‌ها و دانش‌آموزان را در یک پنل مدیریت کنند.</p>
+            <div className="platform-actions">
+              <button className="primary-button" onClick={() => setPage(auth ? (auth.user.role === 'INSTITUTION_ADMIN' ? 'students' : auth.user.role === 'SUPER_ADMIN' ? 'admin' : 'student-courses') : 'login')}>{auth ? 'ورود به فضای کاربری' : 'ورود به حساب'} <span>←</span></button>
+              <a className="platform-secondary-link" href="#platform-features">آشنایی با امکانات</a>
+            </div>
+          </div>
+          <div className="platform-intro-art" aria-hidden="true"><span> {'</>'} </span><b>CodeQuest</b><small>Learn · Practice · Grow</small></div>
+        </section>
+        <section className="platform-features" id="platform-features" aria-label="امکانات پلتفرم">
+          <article><span>▣</span><h3>دوره و درس</h3><p>ساخت دوره‌ها و مرتب‌سازی درس‌ها برای مسیر یادگیری منظم.</p></article>
+          <article><span>✓</span><h3>آزمون و امتیاز</h3><p>سنجش یادگیری با پرسش‌ها، امتیازها و بازخورد روشن.</p></article>
+          <article><span>♙</span><h3>مدیریت دانش‌آموزان</h3><p>ساخت حساب، مدیریت ثبت‌نام و پیگیری وضعیت دانش‌آموزان.</p></article>
+          <article><span>⌘</span><h3>پنل مدیریت</h3><p>مدیریت مؤسسه‌ها، دسترسی دوره‌ها و اطلاعات آموزشی از یک محیط.</p></article>
+        </section>
+
         <section className="welcome-banner">
           <div className="banner-content">
             <span className="banner-tag">مأموریت امروز</span>
