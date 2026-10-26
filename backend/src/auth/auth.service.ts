@@ -18,6 +18,25 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
+  private hashToken(token: string): string {
+    return createHash('sha256').update(token).digest('hex');
+  }
+
+  private createOpaqueToken(): string {
+    return randomBytes(32).toString('base64url');
+  }
+
+  private publicUser(user: User) {
+    return {
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      username: user.username,
+      role: user.role,
+      institutionId: user.institution?.id ?? null,
+    };
+  }
+
   async login(username: string, password: string) {
     const user = await this.userRepository
       .createQueryBuilder('user')
