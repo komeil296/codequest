@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { createHash, randomBytes } from 'crypto';
+import { AuthSession } from './auth-session.entity';
 
 import { User, UserRole } from '../users/user.entity';
 
