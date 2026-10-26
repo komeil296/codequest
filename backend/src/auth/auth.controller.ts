@@ -7,7 +7,7 @@ import {
   Res,
   Req,
   UnauthorizedException,
-  TooManyRequestsException,
+  HttpException,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import {
@@ -31,7 +31,7 @@ function assertLoginAllowed(request: Request): string {
   if (!current || now - current.windowStartedAt >= LOGIN_WINDOW_MS) {
     loginFailures.set(key, { count: 0, windowStartedAt: now });
   } else if (current.count >= LOGIN_MAX_FAILURES) {
-    throw new TooManyRequestsException('Too many login attempts. Please try again in 15 minutes.');
+    throw new HttpException('Too many login attempts. Please try again in 15 minutes.', HttpStatus.TOO_MANY_REQUESTS);
   }
 
   if (loginFailures.size > 5000) {
