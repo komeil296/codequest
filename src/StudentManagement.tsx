@@ -14,7 +14,7 @@ type Props = {
 export default function StudentManagement({ auth, onBack, onLogout }: Props) {
   const [students, setStudents] = useState<Student[]>([])
   const [availableCourses, setAvailableCourses] = useState<CourseOption[]>([])
-  const [selectedEnrollmentCourse, setSelectedEnrollmentCourse] = useState('')
+  const [selectedEnrollmentCourse, setSelectedEnrollmentCourse] = useState(() => sessionStorage.getItem('codequest_institution_course') || '')
   const [courseEnrollments, setCourseEnrollments] = useState<CourseEnrollment[]>([])
   const [selectedEnrollmentStudents, setSelectedEnrollmentStudents] = useState<string[]>([])
   const [firstName, setFirstName] = useState('')
@@ -44,7 +44,12 @@ export default function StudentManagement({ auth, onBack, onLogout }: Props) {
   const loadAvailableCourses = useCallback(async () => {
     const items = await request<CourseOption[]>('/course-enrollments/courses')
     setAvailableCourses(items)
-    setSelectedEnrollmentCourse(current => current && items.some(item => item.id === current) ? current : items[0]?.id || '')
+    setSelectedEnrollmentCourse(current => {
+      const nextCourse = current && items.some(item => item.id === current) ? current : items[0]?.id || ''
+      if (nextCourse) sessionStorage.setItem('codequest_institution_course', nextCourse)
+      else sessionStorage.removeItem('codequest_institution_course')
+      return nextCourse
+    })
   }, [request])
 
   const loadCourseEnrollments = useCallback(async (courseId: string) => {
@@ -243,7 +248,10 @@ export default function StudentManagement({ auth, onBack, onLogout }: Props) {
         </div>
         {availableCourses.length === 0 ? <div className="empty-state">در حال حاضر دوره فعالی برای مؤسسه شما آزاد نشده است.</div> : <>
           <label className="enrollment-course-label">انتخاب دوره
-            <select value={selectedEnrollmentCourse} onChange={e => setSelectedEnrollmentCourse(e.target.value)}>
+            <select value={selectedEnrollmentCourse} onChange={e => {
+              sessionStorage.setItem('codequest_institution_course', e.target.value)
+              setSelectedEnrollmentCourse(e.target.value)
+            }}>
               {availableCourses.map(course => <option key={course.id} value={course.id}>{course.title}</option>)}
             </select>
           </label>
