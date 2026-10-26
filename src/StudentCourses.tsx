@@ -46,7 +46,15 @@ export default function StudentCourses({ auth, onBack, onLogout }: Props) {
     try {
       const items = await request<StudentCourse[]>('/student-courses')
       setCourses(items)
-      setSelectedCourse(current => current ? items.find(item => item.id === current.id) || null : null)
+      setSelectedCourse(current => {
+        const savedId = sessionStorage.getItem('codequest_student_course')
+        const course = (current ? items.find(item => item.id === current.id) : undefined)
+          || (savedId ? items.find(item => item.id === savedId) : undefined)
+          || null
+        if (course) sessionStorage.setItem('codequest_student_course', course.id)
+        else sessionStorage.removeItem('codequest_student_course')
+        return course
+      })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'دریافت دوره‌ها ناموفق بود.')
     } finally {
@@ -56,17 +64,35 @@ export default function StudentCourses({ auth, onBack, onLogout }: Props) {
 
   useEffect(() => { void loadCourses() }, [loadCourses])
 
-  async function openCourse(course: StudentCourse) {
+  useEffect(() => {
+    if (!selectedCourse) {
+      setLessons([])
+      setSelectedLesson(null)
+      return
+    }
+    let cancelled = false
+    setLessons([])
+    setError('')
+    request<CourseLessonsResponse>(`/student-courses/${selectedCourse.id}/lessons`)
+      .then(result => {
+        if (cancelled) return
+        setLessons(result.lessons)
+        const savedLessonId = sessionStorage.getItem('codequest_student_lesson')
+        setSelectedLesson(savedLessonId ? result.lessons.find(lesson => lesson.id === savedLessonId) || null : null)
+      })
+      .catch(err => {
+        if (!cancelled) setError(err instanceof Error ? err.message : 'دریافت درس‌های دوره ناموفق بود.')
+      })
+    return () => { cancelled = true }
+  }, [selectedCourse, request])
+
+  function openCourse(course: StudentCourse) {
+    sessionStorage.setItem('codequest_student_course', course.id)
+    sessionStorage.removeItem('codequest_student_lesson')
     setSelectedCourse(course)
     setSelectedLesson(null)
     setLessons([])
     setError('')
-    try {
-      const result = await request<CourseLessonsResponse>(`/student-courses/${course.id}/lessons`)
-      setLessons(result.lessons)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'دریافت درس‌های دوره ناموفق بود.')
-    }
   }
 
   return (
@@ -92,13 +118,13 @@ export default function StudentCourses({ auth, onBack, onLogout }: Props) {
             <div className="panel-heading">
               <span className="panel-symbol">▣</span>
               <div><h2>درس‌های دوره</h2><p>برای دیدن محتوای هر درس، آن را انتخاب کن.</p></div>
-              <button className="secondary-button refresh-button" onClick={() => { setSelectedCourse(null); setSelectedLesson(null); setLessons([]) }}>همه دوره‌ها</button>
+              <button className="secondary-button refresh-button" onClick={() => { sessionStorage.removeItem('codequest_student_course'); sessionStorage.removeItem('codequest_student_lesson'); setSelectedCourse(null); setSelectedLesson(null); setLessons([]) }}>همه دوره‌ها</button>
             </div>
             {lessons.length === 0 ? <div className="empty-state">هنوز درس فعالی برای این دوره ثبت نشده است.</div> : (
               <div className="student-course-lessons">
                 <div className="student-course-lesson-list">
                   {lessons.map((lesson, index) => (
-                    <button key={lesson.id} className={`student-course-lesson ${selectedLesson?.id === lesson.id ? 'selected' : ''}`} onClick={() => setSelectedLesson(lesson)}>
+                    <button key={lesson.id} className={`student-course-lesson ${selectedLesson?.id === lesson.id ? 'selected' : ''}`} onClick={() => { sessionStorage.setItem('codequest_student_lesson', lesson.id); setSelectedLesson(lesson) }}>
                       <span className="student-course-lesson-number">{(index + 1).toLocaleString('fa-IR')}</span>
                       <span><strong>{lesson.title}</strong><small>{lesson.description || 'درس آموزشی'}</small></span>
                       <span>←</span>
