@@ -14,7 +14,11 @@ type LessonQuestion = { id: string; prompt: string; options: string[]; correctOp
 type Tab = 'overview' | 'courses' | 'lessons' | 'quizzes' | 'students' | 'institutions' | 'institution-admins' | 'course-access'
 
 export default function AdminDashboard({ auth, onLogout, onBack }: Props) {
-  const [tab, setTab] = useState<Tab>('overview')
+  const [tab, setTab] = useState<Tab>(() => {
+    const savedTab = sessionStorage.getItem('codequest_admin_tab')
+    const validTabs: Tab[] = ['overview', 'courses', 'lessons', 'quizzes', 'students', 'institutions', 'institution-admins', 'course-access']
+    return savedTab && validTabs.includes(savedTab as Tab) ? savedTab as Tab : 'overview'
+  })
   const [courses, setCourses] = useState<Course[]>([])
   const [lessons, setLessons] = useState<Lesson[]>([])
   const [institutions, setInstitutions] = useState<Institution[]>([])
@@ -335,7 +339,7 @@ export default function AdminDashboard({ auth, onLogout, onBack }: Props) {
       <a className="admin-brand" href="#admin-home"><span className="admin-brand-mark">C</span><span>Code<span>Quest</span></span></a>
       <div className="admin-user"><div className="admin-avatar">{auth.user.firstName.slice(0, 1)}</div><div><strong>{auth.user.firstName} {auth.user.lastName}</strong><small>مدیر کل سیستم</small></div><span className="admin-role">ADMIN</span></div>
       <p className="admin-nav-label">مدیریت آموزش</p>
-      <nav className="admin-nav">{nav.map(item => <button key={item.id} className={tab === item.id ? 'active' : ''} onClick={() => { setTab(item.id); setSearch('') }}><span>{item.icon}</span>{item.label}<b>←</b></button>)}</nav>
+      <nav className="admin-nav">{nav.map(item => <button key={item.id} className={tab === item.id ? 'active' : ''} onClick={() => { setTab(item.id); sessionStorage.setItem('codequest_admin_tab', item.id); setSearch('') }}><span>{item.icon}</span>{item.label}<b>←</b></button>)}</nav>
       <div className="admin-sidebar-bottom"><div className="admin-sidebar-note"><span>✦</span><div><strong>فضای مدیریت</strong><small>ساخت مسیرهای یادگیری</small></div></div><button className="admin-logout" onClick={onLogout}>↪ خروج از حساب</button></div>
     </aside>
     <main className="admin-main" id="admin-home">
