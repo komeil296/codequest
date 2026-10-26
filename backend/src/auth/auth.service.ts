@@ -50,6 +50,8 @@ export class AuthService {
       institutionId,
     };
 
+    // Authentication currently returns a bearer access token only. Refresh-token
+    // sessions and HttpOnly cookie delivery are not implemented yet.
     return {
       accessToken: await this.jwtService.signAsync(payload),
       user: {
