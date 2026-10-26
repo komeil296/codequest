@@ -42,7 +42,7 @@ export async function apiRequest<T>(path: string, init: RequestInit & { token?: 
 
   let response: Response
   try {
-    response = await fetch(`${API_BASE_URL}${path}`, { ...init, headers })
+    response = await fetch(`${API_BASE_URL}${path}`, { ...init, headers, credentials: 'include' })
   } catch {
     throw new Error('ارتباط با سرور برقرار نشد. مطمئن شو بک‌اند روی پورت 3000 در حال اجراست.')
   }
