@@ -88,16 +88,11 @@ export class AuthService {
       institutionId,
     };
 
+    const sessionTokens = await this.createSessionForUser(user.id);
     return {
       accessToken: await this.jwtService.signAsync(payload),
-      user: {
-        id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        username: user.username,
-        role: user.role,
-        institutionId,
-      },
+      user: this.publicUser(user),
+      ...sessionTokens,
     };
   }
 }
