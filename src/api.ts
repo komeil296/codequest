@@ -34,6 +34,7 @@ export type CreatedStudent = {
 
 const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3000').replace(/\/$/, '')
 let accessTokenInMemory: string | null = null
+let refreshPromise: Promise<LoginResponse> | null = null
 
 export function setAccessToken(token: string | null) {
   accessTokenInMemory = token
@@ -49,21 +50,30 @@ function readCookie(name: string): string | null {
   }
 }
 
-async function refreshAccessToken(): Promise<LoginResponse> {
-  const csrfToken = readCookie('codequest_csrf')
-  if (!csrfToken) throw new Error('نشست شما منقضی شده است. دوباره وارد شوید.')
-  const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: { Accept: 'application/json', 'X-CSRF-Token': csrfToken },
+function refreshAccessToken(): Promise<LoginResponse> {
+  if (refreshPromise) return refreshPromise
+
+  refreshPromise = (async () => {
+    const csrfToken = readCookie('codequest_csrf')
+    if (!csrfToken) throw new Error('نشست شما منقضی شده است. دوباره وارد شوید.')
+    const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { Accept: 'application/json', 'X-CSRF-Token': csrfToken },
+    })
+    if (!response.ok) {
+      setAccessToken(null)
+      throw new Error('نشست شما منقضی شده است. دوباره وارد شوید.')
+    }
+    const result = await response.json() as LoginResponse
+    setAccessToken(result.accessToken)
+    return result
+  })()
+
+  const currentPromise = refreshPromise
+  return currentPromise.finally(() => {
+    if (refreshPromise === currentPromise) refreshPromise = null
   })
-  if (!response.ok) {
-    setAccessToken(null)
-    throw new Error('نشست شما منقضی شده است. دوباره وارد شوید.')
-  }
-  const result = await response.json() as LoginResponse
-  setAccessToken(result.accessToken)
-  return result
 }
 
 export async function restoreSession(): Promise<LoginResponse | null> {
