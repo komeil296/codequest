@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { createHash, randomBytes, timingSafeEqual } from 'crypto';
 import { AuthSession } from './auth-session.entity';
@@ -127,7 +127,7 @@ export class AuthService {
         (!user.institution || !user.institution.isActive))
     ) {
       await this.sessionRepository.update(
-        { id: session.id, revokedAt: null },
+        { id: session.id, revokedAt: IsNull() },
         { revokedAt: new Date() },
       );
       throw new UnauthorizedException('Account is inactive');
@@ -140,7 +140,7 @@ export class AuthService {
       {
         id: session.id,
         refreshTokenHash: oldRefreshHash,
-        revokedAt: null,
+        revokedAt: IsNull(),
       },
       {
         refreshTokenHash: this.hashToken(nextRefreshToken),
@@ -174,7 +174,7 @@ export class AuthService {
       throw new UnauthorizedException('Session is invalid');
     }
     await this.sessionRepository.update(
-      { id: session.id, refreshTokenHash: session.refreshTokenHash, revokedAt: null },
+      { id: session.id, refreshTokenHash: session.refreshTokenHash, revokedAt: IsNull() },
       { revokedAt: new Date() },
     );
   }
