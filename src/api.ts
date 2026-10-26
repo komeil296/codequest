@@ -95,7 +95,7 @@ export async function apiRequest<T>(path: string, init: RequestInit & { token?: 
   const csrfToken = path === '/auth/refresh' || path === '/auth/logout' ? readCookie('codequest_csrf') : null
   if (csrfToken) headers.set('X-CSRF-Token', csrfToken)
 
-  const makeRequest = (token: string | null) => {
+  const makeRequest = () => {
     const requestHeaders = new Headers(headers)
     const effectiveToken = accessTokenInMemory
     if (effectiveToken) requestHeaders.set('Authorization', `Bearer ${effectiveToken}`)
@@ -109,7 +109,7 @@ export async function apiRequest<T>(path: string, init: RequestInit & { token?: 
 
   let response: Response
   try {
-    response = await makeRequest(init.token ?? null)
+    response = await makeRequest()
     if (
       response.status === 401 &&
       path !== '/auth/login' &&
@@ -118,7 +118,7 @@ export async function apiRequest<T>(path: string, init: RequestInit & { token?: 
     ) {
       try {
         await refreshAccessToken()
-        response = await makeRequest(accessTokenInMemory)
+        response = await makeRequest()
       } catch {
         throw new Error('ورود شما منقضی شده است. دوباره وارد شوید.')
       }
