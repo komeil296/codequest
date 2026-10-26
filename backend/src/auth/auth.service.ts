@@ -13,6 +13,8 @@ export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(AuthSession)
+    private readonly sessionRepository: Repository<AuthSession>,
     private readonly jwtService: JwtService,
   ) {}
 
