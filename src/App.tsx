@@ -41,9 +41,8 @@ function App() {
     restoreSession().then(result => {
       if (cancelled) return
       if (!result) {
-      void logoutSession()
-      localStorage.removeItem('codequest_user')
-      setAuth(null)
+        localStorage.removeItem('codequest_user')
+        setAuth(null)
         return
       }
       setAccessToken(result.accessToken)
