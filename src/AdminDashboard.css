@@ -97,3 +97,80 @@
  .admin-lesson-list{padding:0 10px}.admin-lesson-list article{align-items:flex-start}
  .admin-row-actions{width:100%;padding-inline-start:46px}
 }
+
+
+/* AdminLTE-inspired admin content: compact headers, Bootstrap-like forms and tables */
+.admin-shell{--admin-bg:#f4f6f9;--admin-card:#fff;--admin-ink:#343a40;--admin-muted:#6c757d;--admin-border:#dee2e6;background:var(--admin-bg);color:var(--admin-ink)}
+.admin-main{background:#f4f6f9}
+.admin-topbar{padding-bottom:17px;border-bottom:1px solid #dee2e6}
+.admin-topbar>div:first-child>p{font-size:12px;color:#6c757d}
+.admin-topbar h1{font-size:25px;font-weight:500;letter-spacing:0;color:#343a40}
+.admin-top-actions button{border-color:#ced4da;border-radius:4px;color:#495057;background:#fff;font-size:12px}
+.admin-top-actions button:hover{border-color:#80bdff;color:#007bff}
+.admin-work-grid{grid-template-columns:minmax(290px,.82fr) minmax(0,1.7fr);gap:18px}
+.admin-panel{padding:0;border:1px solid rgba(0,0,0,.125);border-radius:4px;box-shadow:0 1px 2px rgba(0,0,0,.04);overflow:hidden}
+.admin-panel-heading{min-height:52px;margin:0;padding:14px 17px;border-bottom:1px solid rgba(0,0,0,.125);background:#fff}
+.admin-panel-heading>span{display:none}
+.admin-panel-heading h2{margin:0 0 4px;color:#343a40;font-size:16px;font-weight:500}
+.admin-panel-heading p{font-size:12px;color:#6c757d}
+.admin-create-form{padding:17px;gap:14px}
+.admin-create-form .admin-panel-heading{margin:-17px -17px 5px;padding:14px 17px;border-bottom:1px solid rgba(0,0,0,.125)}
+.admin-create-form label{gap:6px;color:#343a40;font-size:13px;font-weight:400}
+.admin-create-form label small{color:#6c757d;font-size:11px}
+.admin-create-form input,.admin-create-form textarea,.admin-create-form select,.admin-quiz-builder-standalone>label select{
+ min-height:38px;padding:7px 12px;border:1px solid #ced4da;border-radius:4px;background:#fff;color:#495057;font-size:14px;line-height:1.5;box-shadow:inset 0 1px 1px rgba(0,0,0,.04);transition:border-color .15s,box-shadow .15s
+}
+.admin-create-form textarea{min-height:90px}
+.admin-create-form input:focus,.admin-create-form textarea:focus,.admin-create-form select:focus,.admin-quiz-builder-standalone>label select:focus{
+ border-color:#80bdff;box-shadow:0 0 0 3px rgba(0,123,255,.18);outline:0
+}
+.admin-create-form input::placeholder,.admin-create-form textarea::placeholder{color:#6c757d;opacity:.7}
+.admin-primary{min-height:38px;align-self:start;display:inline-flex;width:auto;gap:9px;padding:8px 13px;border:1px solid #007bff;border-radius:4px;background:#007bff;color:#fff;font-size:13px;font-weight:400;box-shadow:none}
+.admin-primary:hover:not(:disabled){background:#0069d9;border-color:#0062cc;transform:none}
+.admin-help{color:#6c757d;font-size:12px;line-height:1.65}
+.admin-list-panel>.admin-panel-heading{display:flex;flex-wrap:wrap}
+.admin-search{width:min(230px,45%);min-height:36px;padding:6px 10px;border:1px solid #ced4da;border-radius:4px;background:#fff;font-size:13px}
+.admin-search:focus{border-color:#80bdff;box-shadow:0 0 0 3px rgba(0,123,255,.14)}
+.admin-table-wrap{border:0;border-radius:0;overflow-x:auto}
+.admin-table-wrap table{border-collapse:collapse;white-space:normal}
+.admin-table-wrap th{padding:11px 12px;background:#f4f6f9;border-top:1px solid #dee2e6;border-bottom:2px solid #dee2e6;color:#495057;font-size:12px;font-weight:600}
+.admin-table-wrap th:first-child,.admin-table-wrap th:last-child{border-radius:0}
+.admin-table-wrap td{padding:11px 12px;border-bottom:1px solid #dee2e6;color:#495057;font-size:12px;vertical-align:middle}
+.admin-table-wrap tbody tr:hover{background:#f8f9fa}
+.admin-table-wrap td>strong{margin-bottom:3px;color:#343a40;font-size:13px;font-weight:600}
+.admin-table-wrap td>small{max-width:280px;color:#6c757d;font-size:11px}
+.admin-status{padding:4px 8px;border-radius:4px;font-size:11px;font-weight:500}
+.admin-status.is-active{background:#d4edda;color:#155724;border-color:#c3e6cb}
+.admin-status.is-inactive{background:#f8d7da;color:#721c24;border-color:#f5c6cb}
+.admin-row-actions{gap:5px}
+.admin-row-actions button{padding:5px 8px;border:1px solid #ced4da;border-radius:4px;background:#fff;color:#495057;font-size:11px}
+.admin-row-actions button:hover{border-color:#adb5bd;background:#f4f6f9;color:#212529}
+.admin-row-actions button.admin-danger{border-color:#dc3545;background:#dc3545;color:#fff}
+.admin-row-actions button.admin-danger:hover{background:#c82333;border-color:#bd2130}
+.admin-lesson-list{padding:0 16px;border:0;border-radius:0}
+.admin-lesson-list article{padding:13px 0;border-top:1px solid #dee2e6}
+.admin-lesson-order{width:32px;height:32px;border-radius:4px;background:#e9ecef;color:#495057;border:0}
+.admin-lesson-info strong{font-size:13px;color:#343a40}
+.admin-lesson-info small{font-size:11px;color:#6c757d}
+.admin-access-choice,.admin-quiz-options{padding:12px;border:1px solid #dee2e6;border-radius:4px;background:#f8f9fa}
+.admin-access-option{padding:9px;border-color:#dee2e6;border-radius:4px}
+.admin-access-option:has(input:checked){border-color:#80bdff;background:#eaf4ff}
+.admin-quiz-builder{margin:0;padding:17px;border-top:1px solid #dee2e6}
+.admin-quiz-builder .admin-panel-heading{margin:-17px -17px 16px}
+.admin-quiz-existing{gap:8px}
+.admin-quiz-existing h3{font-size:14px;font-weight:500;color:#343a40}
+.admin-quiz-existing article{border-color:#dee2e6;border-radius:4px;background:#fff}
+.admin-credentials{margin:14px;padding:12px;border-radius:4px}
+.admin-empty{padding:30px 12px;color:#6c757d;font-size:13px}
+.admin-notice{border-radius:4px}
+@media(max-width:900px){.admin-work-grid{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:650px){
+ .admin-work-grid{gap:13px}
+ .admin-panel-heading{padding:12px}
+ .admin-create-form{padding:14px}
+ .admin-create-form .admin-panel-heading{margin:-14px -14px 5px;padding:12px 14px}
+ .admin-quiz-builder{padding:14px}
+ .admin-quiz-builder .admin-panel-heading{margin:-14px -14px 14px}
+ .admin-table-wrap table{min-width:580px}
+ .admin-search{width:100%;max-width:none}
+}
